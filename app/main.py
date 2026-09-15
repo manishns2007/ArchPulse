@@ -13,6 +13,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from app.api.action_extraction import router as action_extraction_router
 from app.api.ingestion import router as ingestion_router
 from app.api.understanding import router as understanding_router
 from app.config import settings
@@ -58,7 +59,9 @@ def create_app() -> FastAPI:
             "**Module 2 — Understanding**: Uses an LLM to produce a structured "
             "`UnderstandingResult` from any ingested communication — summarizing content, "
             "identifying topics, stakeholders, communication type, and important context.\n\n"
-            "> No task/deadline/responsibility/decision extraction is performed in Module 2."
+            "**Module 3 — Action Extraction**: Identifies actionable work (tasks, requests, "
+            "deliverables, reviews, follow-ups, coordination) from project communications.\n\n"
+            "> No responsibility/deadline/decision extraction is performed in Module 3."
         ),
         version="2.0.0",
         contact={
@@ -81,13 +84,14 @@ def create_app() -> FastAPI:
     # Register routers
     app.include_router(ingestion_router)
     app.include_router(understanding_router)
+    app.include_router(action_extraction_router)
 
     # Health check
     @app.get("/health", tags=["Health"], summary="Health check")
     async def health() -> JSONResponse:
         return JSONResponse({
             "status": "ok",
-            "modules": ["ingestion", "understanding"],
+            "modules": ["ingestion", "understanding", "action_extraction"],
             "version": "2.0.0",
         })
 
