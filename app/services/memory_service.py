@@ -528,10 +528,11 @@ class MemoryService:
 
             score = 0.0
 
-            # Exact phrase matching (+10 for title, +8 for content/evidence)
+            # Exact phrase matching (+10 for title with density bonus, +8 for content/evidence)
             if len(raw_query) > 2:
                 if raw_query in title_lower:
-                    score += 10.0
+                    density = len(raw_query) / max(len(title_lower), 1)
+                    score += 10.0 + round(5.0 * density, 2)
                 if raw_query in content_lower:
                     score += 8.0
                 if raw_query in evidence_lower:

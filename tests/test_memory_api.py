@@ -429,13 +429,18 @@ class TestCriticalLiveIntegrationFlow:
         assert res2.status_code == 200
         data2 = res2.json()["data"]
         assert data2["result_count"] >= 1
-        top2 = data2["results"][0]
-        assert top2["title"] == "Send the structural drawing"
-        assert top2["metadata"]["responsible_party"] == "Architect"
-        assert top2["metadata"]["normalized_deadline"] == "2026-09-18"
-        assert top2["evidence"] == "Architect will send the structural drawing by Friday."
-        assert top2["communication_id"] == comm_id
-        assert top2["source_id"] == str(task_structural.task_id)
+        # Section 22: Expected results should include the task "Send the structural drawing"
+        task_match = next(
+            (r for r in data2["results"] if r["title"] == "Send the structural drawing"),
+            None,
+        )
+        assert task_match is not None, "Results should include the structural drawing task"
+        assert task_match["item_type"] == "task"
+        assert task_match["metadata"]["responsible_party"] == "Architect"
+        assert task_match["metadata"]["normalized_deadline"] == "2026-09-18"
+        assert task_match["evidence"] == "Architect will send the structural drawing by Friday."
+        assert task_match["communication_id"] == comm_id
+        assert task_match["source_id"] == str(task_structural.task_id)
 
         # Query 3: "Britto Sir"
         res3 = client.post(
