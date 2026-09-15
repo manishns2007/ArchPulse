@@ -132,7 +132,7 @@ export const CommunicationDrawer: React.FC<CommunicationDrawerProps> = ({
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              {tasks.map(t => (
+              {tasks.map((t: StructuredTask) => (
                 <div
                   key={t.task_id}
                   style={{
@@ -218,7 +218,7 @@ export const CommunicationDrawer: React.FC<CommunicationDrawerProps> = ({
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              {decisions.map(d => (
+              {decisions.map((d: DecisionItem) => (
                 <div
                   key={d.decision_id}
                   style={{
@@ -251,12 +251,11 @@ export const CommunicationDrawer: React.FC<CommunicationDrawerProps> = ({
                           title: d.subject ? `${d.subject}: ${d.description}` : d.description,
                           content: d.description,
                           evidence: d.evidence,
-                          score: d.confidence || 1.0,
+                          score: 1.0,
                           retrieval_mode: 'deterministic',
                           metadata: {
                             subject: d.subject,
                             status: d.status,
-                            confidence: d.confidence,
                           },
                         })
                       }

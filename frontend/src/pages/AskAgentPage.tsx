@@ -6,7 +6,6 @@ import {
   ShieldCheck,
   AlertTriangle,
   Search,
-  Tag,
 } from 'lucide-react';
 import type { AgentResponse, MemorySearchResultItem } from '../types';
 import { queryAgent } from '../api/agent';
