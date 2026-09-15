@@ -159,7 +159,9 @@ class FakeLLMProvider(LLMProvider):
             data = self._fixed_response
         else:
             full_prompt = " ".join(m.content for m in request.messages)
-            if "actions" in full_prompt.lower() or "actionable" in full_prompt.lower():
+            if "assignment" in full_prompt.lower() or "responsib" in full_prompt.lower():
+                data = _default_fake_responsibility_response(full_prompt)
+            elif "actions" in full_prompt.lower() or "actionable" in full_prompt.lower():
                 data = _default_fake_actions_response()
             else:
                 data = _default_fake_response()
@@ -169,6 +171,53 @@ class FakeLLMProvider(LLMProvider):
             model="fake-model-v1",
             usage={"input": 10, "output": 20},
         )
+
+
+def _default_fake_responsibility_response(prompt: str = "") -> dict[str, Any]:
+    """The default structured responsibility response returned by FakeLLMProvider."""
+    import re
+
+    action_ids = re.findall(r'"action_id":\s*"([^"]+)"', prompt)
+    if action_ids:
+        assignments = []
+        for idx, aid in enumerate(action_ids):
+            if idx == 0:
+                assignments.append({
+                    "action_id": aid,
+                    "responsible_party": "Architect",
+                    "responsibility_type": "role",
+                    "evidence": "Architect will send the structural drawing by Friday.",
+                    "confidence": 0.95,
+                })
+            elif idx == 1:
+                assignments.append({
+                    "action_id": aid,
+                    "responsible_party": "Contractor",
+                    "responsibility_type": "role",
+                    "evidence": "Contractor should verify the cabinet dimensions.",
+                    "confidence": 0.90,
+                })
+            else:
+                assignments.append({
+                    "action_id": aid,
+                    "responsible_party": None,
+                    "responsibility_type": "unknown",
+                    "evidence": None,
+                    "confidence": 0.5,
+                })
+        return {"assignments": assignments}
+
+    return {
+        "assignments": [
+            {
+                "action_id": "default-act-1",
+                "responsible_party": "Architect",
+                "responsibility_type": "role",
+                "evidence": "Architect will send the structural drawing by Friday.",
+                "confidence": 0.95,
+            }
+        ]
+    }
 
 
 def _default_fake_actions_response() -> dict[str, Any]:
