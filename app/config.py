@@ -1,6 +1,7 @@
 """
-ArchScale — Module 1: Communication Ingestion Layer
+ArchScale — Communication Agent
 Application configuration via environment variables.
+Covers Module 1 (ingestion) and Module 2 (understanding).
 """
 
 from __future__ import annotations
@@ -20,7 +21,9 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    # Storage
+    # ------------------------------------------------------------------
+    # Module 1 — Storage
+    # ------------------------------------------------------------------
     storage_root: str = "storage"
     raw_storage_dir: str = "raw"
     processed_storage_dir: str = "processed"
@@ -30,6 +33,26 @@ class Settings(BaseSettings):
 
     # Allowed file extensions
     allowed_extensions: str = ".txt,.pdf"
+
+    # ------------------------------------------------------------------
+    # Module 2 — LLM Provider
+    # ------------------------------------------------------------------
+
+    # Which provider to use: "gemini" | "openai" | "fake"
+    # Set to "fake" in tests so no real API calls are made.
+    llm_provider: str = "gemini"
+
+    # Model identifier (interpreted by the selected provider)
+    llm_model: str = "gemini-2.0-flash"
+
+    # API key — read from env, never hard-coded
+    llm_api_key: str = ""
+
+    # Request timeout in seconds
+    llm_timeout_seconds: int = 30
+
+    # Number of retry attempts on transient failures
+    llm_max_retries: int = 2
 
     # -------------------------------------------------------------------
     # Derived helpers (not env vars)

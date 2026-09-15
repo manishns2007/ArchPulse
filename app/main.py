@@ -1,6 +1,6 @@
 """
-ArchScale — Module 1: Communication Ingestion Layer
-FastAPI application entry point.
+ArchScale — Communication Agent
+FastAPI application entry point (Module 1 + Module 2).
 """
 
 from __future__ import annotations
@@ -14,6 +14,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.api.ingestion import router as ingestion_router
+from app.api.understanding import router as understanding_router
 from app.config import settings
 
 # ---------------------------------------------------------------------------
@@ -48,15 +49,18 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
 def create_app() -> FastAPI:
     app = FastAPI(
-        title="ArchScale — Communication Ingestion API",
+        title="ArchScale — Project Communication Agent",
         description=(
-            "**Module 1** of the ArchScale Project Communication Agent.\n\n"
-            "This service accepts raw project communications (pasted text, meeting transcripts, "
-            "`.txt` files, and `.pdf` files) and converts them into normalized "
-            "`CommunicationRecord` objects for consumption by later modules.\n\n"
-            "> ⚠️ No AI extraction is performed in this module."
+            "AI-powered Project Communication Agent for the ArchScale Hackathon.\n\n"
+            "**Module 1 — Ingestion**: Accepts raw project communications (pasted text, "
+            "meeting transcripts, `.txt` and `.pdf` files) and converts them into normalized "
+            "`CommunicationRecord` objects.\n\n"
+            "**Module 2 — Understanding**: Uses an LLM to produce a structured "
+            "`UnderstandingResult` from any ingested communication — summarizing content, "
+            "identifying topics, stakeholders, communication type, and important context.\n\n"
+            "> No task/deadline/responsibility/decision extraction is performed in Module 2."
         ),
-        version="1.0.0",
+        version="2.0.0",
         contact={
             "name": "ArchScale Hackathon Team",
         },
@@ -76,11 +80,16 @@ def create_app() -> FastAPI:
 
     # Register routers
     app.include_router(ingestion_router)
+    app.include_router(understanding_router)
 
     # Health check
     @app.get("/health", tags=["Health"], summary="Health check")
     async def health() -> JSONResponse:
-        return JSONResponse({"status": "ok", "module": "ingestion", "version": "1.0.0"})
+        return JSONResponse({
+            "status": "ok",
+            "modules": ["ingestion", "understanding"],
+            "version": "2.0.0",
+        })
 
     return app
 
