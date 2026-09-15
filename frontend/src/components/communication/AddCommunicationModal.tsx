@@ -13,8 +13,8 @@ import {
 import {
   runSequentialPipeline,
   INITIAL_PIPELINE_STAGES,
-  PipelineStageState,
-  PipelineStageKey,
+  type PipelineStageState,
+  type PipelineStageKey,
 } from '../../api/pipeline';
 
 interface AddCommunicationModalProps {

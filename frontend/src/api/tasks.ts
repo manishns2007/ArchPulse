@@ -27,7 +27,16 @@ export async function getProjectTasks(projectId: string, filters: TaskFilters = 
   const res = await request<ApiSuccessResponse<{ project_id: string; tasks: StructuredTask[]; task_count: number }>>(
     `/api/v1/memory/project/${encodeURIComponent(projectId)}/tasks${queryString}`
   );
-  return res.data.tasks;
+  return res.data.tasks || [];
+}
+
+export async function getTasksByCommunication(communicationId: string, projectId: string = 'villa-live-proj'): Promise<StructuredTask[]> {
+  try {
+    const allTasks = await getProjectTasks(projectId);
+    return allTasks.filter(t => t.communication_id === communicationId);
+  } catch {
+    return [];
+  }
 }
 
 export async function structureTasks(communicationId: string): Promise<StructuredTask[]> {

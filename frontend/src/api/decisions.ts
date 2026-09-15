@@ -19,7 +19,16 @@ export async function getProjectDecisions(projectId: string): Promise<DecisionIt
   const res = await request<ApiSuccessResponse<{ project_id: string; decisions: DecisionItem[]; decision_count: number }>>(
     `/api/v1/memory/project/${encodeURIComponent(projectId)}/decisions`
   );
-  return res.data.decisions;
+  return res.data.decisions || [];
+}
+
+export async function getDecisionsByCommunication(communicationId: string, projectId: string = 'villa-live-proj'): Promise<DecisionItem[]> {
+  try {
+    const allDecisions = await getProjectDecisions(projectId);
+    return allDecisions.filter(d => d.communication_id === communicationId);
+  } catch {
+    return [];
+  }
 }
 
 export async function extractDecisions(communicationId: string): Promise<any> {

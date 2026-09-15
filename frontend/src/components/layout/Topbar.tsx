@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Search, Server, Wifi, Sparkles } from 'lucide-react';
+import { Search, Server, Sparkles } from 'lucide-react';
 import { ProjectSelector } from './ProjectSelector';
 import { request } from '../../api/client';
 

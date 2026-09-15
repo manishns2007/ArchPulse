@@ -1,19 +1,15 @@
-import React, { useEffect, useState } from 'react';
 import {
   X,
-  FileText,
   CheckSquare,
   Scale,
   Calendar,
   User,
-  ExternalLink,
   ShieldCheck,
-  Tag,
   Clock,
 } from 'lucide-react';
-import type { CommunicationRecord, StructuredTask, ExtractedDecision } from '../../types';
+import type { CommunicationRecord, StructuredTask } from '../../types';
 import { getTasksByCommunication } from '../../api/tasks';
-import { getDecisionsByCommunication } from '../../api/decisions';
+import { getDecisionsByCommunication, type DecisionItem } from '../../api/decisions';
 
 interface CommunicationDrawerProps {
   communication: CommunicationRecord | null;
@@ -27,7 +23,7 @@ export const CommunicationDrawer: React.FC<CommunicationDrawerProps> = ({
   onInspectProvenance,
 }) => {
   const [tasks, setTasks] = useState<StructuredTask[]>([]);
-  const [decisions, setDecisions] = useState<ExtractedDecision[]>([]);
+  const [decisions, setDecisions] = useState<DecisionItem[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -92,7 +88,7 @@ export const CommunicationDrawer: React.FC<CommunicationDrawerProps> = ({
             <div style={{ fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '2px' }}>Ingested At</div>
             <div style={{ fontSize: '12px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '4px' }}>
               <Clock size={12} color="var(--text-muted)" />
-              {communication.ingested_at ? new Date(communication.ingested_at).toLocaleString() : 'Just now'}
+              {communication.timestamp ? new Date(communication.timestamp).toLocaleString() : 'Just now'}
             </div>
           </div>
         </div>
