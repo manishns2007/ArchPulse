@@ -466,14 +466,63 @@ POST /api/v1/responsibilities/extract
 
 ---
 
+## Module 5: Deadline Detection
+
+Determines **when an already-extracted action is due** from Module 3.
+
+- **Strict Boundary**: Handles strictly deadline / due-date assignments, classification (`exact_date`, `relative_day`, `relative_time`, `event_based`, `no_deadline`, `unknown`), supporting verbatim evidence, normalized deadlines (where safely determinable), and confidence. Rejects all owner, decision, approval, priority, and status fields (`extra="forbid"`).
+- **Date Disambiguation (Deadline ≠ Every Date)**: Meeting dates, past occurrences, and discussion dates are strictly not treated as deadlines.
+- **Deterministic 1-to-1 Mapping**: Every Module 3 action receives a Module 5 deadline assignment. If no deadline exists, it is explicitly assigned `deadline_type: "no_deadline"`.
+- **Server-Side ID Generation**: Action linking preserves Module 3 `action_id`, and `deadline_id` is generated server-side via UUID4.
+
+### Endpoint
+
+```http
+POST /api/v1/deadlines/extract
+```
+
+**Request:**
+```json
+{
+  "communication_id": "7e5381ee-59f4-427f-88ac-3dcf6982d218",
+  "include_context": true
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "project_id": "villa-001",
+    "communication_id": "7e5381ee-59f4-427f-88ac-3dcf6982d218",
+    "assignments": [
+      {
+        "deadline_id": "9b12a840-9a88-4cf6-819a-243290ebd410",
+        "action_id": "4e183707-ca90-4c7b-b380-60298a09fca9",
+        "deadline": "Friday",
+        "deadline_type": "relative_day",
+        "normalized_deadline": null,
+        "evidence": "Architect will send the structural drawing by Friday.",
+        "confidence": 0.95
+      }
+    ],
+    "extracted_at": "2026-09-15T17:20:00Z",
+    "llm_model": "gemini"
+  }
+}
+```
+
+---
+
 ## Testing
 
 ```powershell
-# Run all tests across Modules 1, 2, 3, and 4
+# Run all tests across Modules 1, 2, 3, 4, and 5
 py -m pytest tests/ -v --tb=short
 ```
 
-Current test status: **196 tests passing** (83 Module 1 + 49 Module 2 + 32 Module 3 + 32 Module 4).
+Current test status: **231 tests passing** (83 Module 1 + 49 Module 2 + 32 Module 3 + 32 Module 4 + 35 Module 5).
 
 ---
 
@@ -483,6 +532,6 @@ Current test status: **196 tests passing** (83 Module 1 + 49 Module 2 + 32 Modul
 - **Module 2**: Communication Understanding ✅
 - **Module 3**: Action Extraction ✅
 - **Module 4**: Responsibility Detection ✅
-- **Module 5**: Deadline Detection
+- **Module 5**: Deadline Detection ✅
 - **Module 6**: Decision / Approval Extraction
 - **Module 7**: Conversation → Structured Task
