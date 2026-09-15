@@ -419,14 +419,61 @@ POST /api/v1/actions/extract
 
 ---
 
+## Module 4: Responsibility Detection
+
+Determines **who is responsible for performing each already-extracted action** from Module 3.
+
+- **Strict Boundary**: Handles strictly responsibility assignments, classification (`person`, `role`, `team`, `organization`, `group`, `unknown`), supporting verbatim evidence, and confidence. Rejects all deadline, decision, and priority fields (`extra="forbid"`).
+- **Anti-Hallucination**: Never assigns ownership merely because an entity appears in conversation; requires explicit evidence.
+- **Server-Side ID Generation**: Action linking preserves Module 3 `action_id`, and `responsibility_id` is generated server-side via UUID4.
+
+### Endpoint
+
+```http
+POST /api/v1/responsibilities/extract
+```
+
+**Request:**
+```json
+{
+  "communication_id": "7e5381ee-59f4-427f-88ac-3dcf6982d218",
+  "include_understanding_context": true
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "project_id": "villa-001",
+    "communication_id": "7e5381ee-59f4-427f-88ac-3dcf6982d218",
+    "assignments": [
+      {
+        "responsibility_id": "8f3b3810-7798-4ca9-9686-353246ebec21",
+        "action_id": "4e183707-ca90-4c7b-b380-60298a09fca9",
+        "responsible_party": "Architect",
+        "responsibility_type": "role",
+        "evidence": "Architect will send the structural drawing by Friday.",
+        "confidence": 0.95
+      }
+    ],
+    "extracted_at": "2026-09-15T17:15:00Z",
+    "llm_model": "gemini"
+  }
+}
+```
+
+---
+
 ## Testing
 
 ```powershell
-# Run all tests across Modules 1, 2, and 3
+# Run all tests across Modules 1, 2, 3, and 4
 py -m pytest tests/ -v --tb=short
 ```
 
-Current test status: **164 tests passing** (83 Module 1 + 49 Module 2 + 32 Module 3).
+Current test status: **196 tests passing** (83 Module 1 + 49 Module 2 + 32 Module 3 + 32 Module 4).
 
 ---
 
@@ -435,6 +482,7 @@ Current test status: **164 tests passing** (83 Module 1 + 49 Module 2 + 32 Modul
 - **Module 1**: Communication Ingestion ✅
 - **Module 2**: Communication Understanding ✅
 - **Module 3**: Action Extraction ✅
-- **Module 4**: Responsibility & Deadline Resolution
-- **Module 5**: Decision & Memory Layer
-- **Module 6**: Autonomous Agent & Notification Dispatcher
+- **Module 4**: Responsibility Detection ✅
+- **Module 5**: Deadline Detection
+- **Module 6**: Decision / Approval Extraction
+- **Module 7**: Conversation → Structured Task
