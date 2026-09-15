@@ -2,15 +2,11 @@ import React, { useEffect, useState } from 'react';
 import {
   Brain,
   Search,
-  Filter,
   ShieldCheck,
   Database,
-  Tag,
   Sparkles,
-  ArrowRight,
-  Layers,
 } from 'lucide-react';
-import type { MemorySearchResult, MemorySearchResultItem } from '../types';
+import type { MemorySearchResultItem } from '../types';
 import { searchProjectMemory } from '../api/memory';
 
 interface MemoryPageProps {
@@ -29,7 +25,6 @@ export const MemoryPage: React.FC<MemoryPageProps> = ({
   const [query, setQuery] = useState('');
   const [itemType, setItemType] = useState<string>('all');
   const [results, setResults] = useState<MemorySearchResultItem[]>([]);
-  const [totalMatches, setTotalMatches] = useState(0);
   const [loading, setLoading] = useState(false);
 
   const executeSearch = async (targetQuery = query, targetType = itemType) => {
@@ -41,8 +36,7 @@ export const MemoryPage: React.FC<MemoryPageProps> = ({
         item_type: targetType,
         limit: 50,
       });
-      setResults(res.items || []);
-      setTotalMatches(res.total_matches ?? res.items?.length ?? 0);
+      setResults(res.results || []);
     } catch (err) {
       console.error('Failed to search memory:', err);
     } finally {

@@ -10,12 +10,10 @@ import {
   ShieldCheck,
   Calendar,
   User,
-  Activity,
-  Layers,
   Search,
-  ExternalLink,
 } from 'lucide-react';
-import type { ProjectMemoryOverview, StructuredTask, DecisionItem, CommunicationRecord } from '../types';
+import type { ProjectMemoryOverview, StructuredTask, CommunicationRecord } from '../types';
+import type { DecisionItem } from '../api/decisions';
 import { getProjectOverview } from '../api/memory';
 import { getProjectTasks } from '../api/tasks';
 import { getProjectDecisions } from '../api/decisions';
@@ -138,7 +136,7 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
             </div>
           </div>
           <div style={{ fontSize: '26px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '4px' }}>
-            {loading ? '...' : overview?.total_items ?? 0}
+            {loading ? '...' : overview?.memory_items ?? 0}
           </div>
           <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
             Indexed items in M8 memory
@@ -160,7 +158,7 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
             </div>
           </div>
           <div style={{ fontSize: '26px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '4px' }}>
-            {loading ? '...' : overview?.active_tasks_count ?? tasks.length}
+            {loading ? '...' : overview?.tasks ?? tasks.length}
           </div>
           <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
             Derived with owners & deadlines
@@ -182,14 +180,14 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
             </div>
           </div>
           <div style={{ fontSize: '26px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '4px' }}>
-            {loading ? '...' : overview?.decisions_count ?? decisions.length}
+            {loading ? '...' : (overview ? overview.decisions + overview.approvals : decisions.length)}
           </div>
           <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
             Authoritative project agreements
           </div>
         </div>
 
-        {/* Card 4: Stakeholders */}
+        {/* Card 4: Communications */}
         <div
           className="metric-card"
           onClick={() => onNavigate('/communications')}
@@ -197,17 +195,17 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
         >
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
             <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
-              Stakeholders
+              Ingested Feeds
             </span>
             <div style={{ padding: '6px', borderRadius: 'var(--radius-sm)', background: 'rgba(245, 158, 11, 0.12)' }}>
               <User size={16} color="#f59e0b" />
             </div>
           </div>
           <div style={{ fontSize: '26px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '4px' }}>
-            {loading ? '...' : overview?.unique_stakeholders?.length ?? 0}
+            {loading ? '...' : overview?.communications ?? communications.length}
           </div>
           <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-            Identified active participants
+            Indexed communication streams
           </div>
         </div>
       </div>

@@ -2,14 +2,11 @@ import React, { useEffect, useState } from 'react';
 import {
   CheckSquare,
   Search,
-  Filter,
   User,
   Calendar,
   ShieldCheck,
   RefreshCw,
-  Clock,
   Sparkles,
-  AlertCircle,
 } from 'lucide-react';
 import type { StructuredTask } from '../types';
 import { getProjectTasks } from '../api/tasks';
