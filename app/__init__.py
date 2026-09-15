@@ -1,0 +1,1 @@
+"""ArchScale app package."""
