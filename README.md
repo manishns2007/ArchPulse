@@ -238,20 +238,27 @@ archscale/
 ├── app/
 │   ├── main.py                          # FastAPI app entry point
 │   ├── config.py                        # Settings (storage + LLM) via env vars
-│   ├── models/
-│   │   ├── communication.py             # CommunicationRecord + enums (Module 1)
-│   │   └── understanding.py             # UnderstandingResult + schemas (Module 2)
 │   ├── api/
-│   │   ├── ingestion.py                 # Ingestion HTTP handlers (Module 1)
-│   │   └── understanding.py             # Understanding HTTP handler (Module 2)
+│   │   ├── __init__.py
+│   │   ├── action_extraction.py         # Module 3: Action extraction endpoints
+│   │   ├── ingestion.py                 # Module 1: Ingestion endpoints
+│   │   └── understanding.py             # Module 2: Understanding endpoints
+│   ├── models/
+│   │   ├── __init__.py
+│   │   ├── action_extraction.py         # ExtractedAction, ActionExtractionResult
+│   │   ├── communication.py             # CommunicationRecord, SourceType
+│   │   └── understanding.py             # UnderstandingResult
 │   ├── services/
-│   │   ├── ingestion_service.py         # Core ingestion logic (Module 1)
-│   │   └── understanding_service.py     # Core understanding logic (Module 2)
+│   │   ├── __init__.py
+│   │   ├── action_extraction_service.py # Action extraction business logic
+│   │   ├── ingestion_service.py         # Ingestion orchestration
+│   │   └── understanding_service.py     # Understanding orchestration
 │   ├── llm/
 │   │   ├── base.py                      # LLMProvider abstract class
 │   │   └── provider.py                  # Gemini, FakeLLMProvider, factory
 │   ├── prompts/
-│   │   └── understanding.py             # System + user prompt templates
+│   │   ├── action_extraction.py         # Action extraction system & user prompts
+│   │   └── understanding.py             # Understanding system & user prompts
 │   └── utils/
 │       ├── pdf_extractor.py             # PDF text extraction (pypdf)
 │       └── validators.py                # Reusable input validation helpers
@@ -265,7 +272,9 @@ archscale/
 │   ├── test_validators.py               # Validator unit tests
 │   ├── test_llm_provider.py             # Module 2 LLM provider tests
 │   ├── test_understanding_service.py    # Module 2 service tests
-│   └── test_understanding_api.py        # Module 2 HTTP tests
+│   ├── test_understanding_api.py        # Module 2 HTTP tests
+│   ├── test_action_extraction_service.py# Module 3 service tests
+│   └── test_action_extraction_api.py    # Module 3 HTTP tests
 ├── requirements.txt
 ├── .env.example
 └── README.md
