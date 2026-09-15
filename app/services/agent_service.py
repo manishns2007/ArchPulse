@@ -237,6 +237,36 @@ class AgentService:
             )
             res = self.memory_service.search(fallback_req)
 
+        # If deadline query returned no keyword matches, retrieve tasks with deadlines
+        if intent == "deadline" and res.result_count == 0:
+            tasks_data = self.memory_service.get_project_tasks(project_id)
+            deadline_tasks = [
+                t for t in tasks_data.tasks
+                if (t.deadline or t.normalized_deadline) and t.deadline_type != "no_deadline"
+            ]
+            if deadline_tasks:
+                return [
+                    MemorySearchResultItem(
+                        memory_id=str(t.task_id),
+                        project_id=t.project_id,
+                        item_type="task",
+                        source_id=str(t.task_id),
+                        communication_id=str(t.communication_id),
+                        title=t.title,
+                        content=t.description,
+                        evidence=t.evidence,
+                        metadata={
+                            "responsible_party": t.responsible_party,
+                            "deadline": t.deadline,
+                            "normalized_deadline": t.normalized_deadline,
+                            "status": t.status,
+                        },
+                        score=10.0,
+                        retrieval_mode="keyword",
+                    )
+                    for t in deadline_tasks
+                ]
+
         return res.results
 
     def _handle_project_overview(self, project_id: str, query: str) -> AgentResponse:
