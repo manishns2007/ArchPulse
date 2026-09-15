@@ -332,6 +332,7 @@ class TestCriticalLiveIntegrationFlow:
             topics=["kitchen layout", "structural drawing", "drawing review"],
             stakeholders=["Client", "Architect", "Britto Sir"],
             communication_type="mixed",
+            important_context=["Review scheduled after receipt."],
         )
 
         # 3. Decision (M6 representation)
