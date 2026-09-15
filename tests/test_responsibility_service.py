@@ -515,7 +515,16 @@ class TestResponsibilityServiceErrors:
     def test_empty_content_raises_responsibility_error(self) -> None:
         action = _make_action()
         svc = _make_service()
-        record = _make_record(raw_content="   ")
+        record = CommunicationRecord.model_construct(
+            project_id="proj-villa",
+            communication_id="test-comm-001",
+            source_type=SourceType.text,
+            timestamp=datetime.now(timezone.utc),
+            raw_content="   ",
+            metadata={},
+            storage_path=None,
+            status=IngestionStatus.ingested,
+        )
         with pytest.raises(ResponsibilityError, match="empty or whitespace-only"):
             svc.detect_responsibilities(record, actions=[action])
 

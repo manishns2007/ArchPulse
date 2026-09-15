@@ -159,7 +159,10 @@ class FakeLLMProvider(LLMProvider):
             data = self._fixed_response
         else:
             full_prompt = " ".join(m.content for m in request.messages)
-            if "assignment" in full_prompt.lower() or "responsib" in full_prompt.lower():
+            if (
+                "responsibility types" in full_prompt.lower()
+                or "actions to assign responsibility for" in full_prompt.lower()
+            ):
                 data = _default_fake_responsibility_response(full_prompt)
             elif "actions" in full_prompt.lower() or "actionable" in full_prompt.lower():
                 data = _default_fake_actions_response()
