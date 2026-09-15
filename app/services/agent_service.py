@@ -212,11 +212,17 @@ class AgentService:
         elif intent == "communication":
             item_type_filter = "communication"
 
+        resp_party = (
+            filters.get("responsible_party")
+            if intent in ("task", "responsibility")
+            else None
+        )
+
         search_req = MemorySearchRequest(
             project_id=project_id,
             query=search_kw,
             item_type=item_type_filter,  # type: ignore[arg-type]
-            responsible_party=filters.get("responsible_party"),
+            responsible_party=resp_party,
             status=filters.get("status"),
             limit=10,
         )
@@ -227,7 +233,6 @@ class AgentService:
             fallback_req = MemorySearchRequest(
                 project_id=project_id,
                 query=search_kw,
-                responsible_party=filters.get("responsible_party"),
                 limit=10,
             )
             res = self.memory_service.search(fallback_req)

@@ -335,5 +335,6 @@ class TestTaskAPI:
             "decision",
             "structured_tasks",
             "project_memory",
+            "agent_query",
         ]
         assert body["modules"] == expected_modules
