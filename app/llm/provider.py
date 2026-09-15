@@ -141,7 +141,7 @@ class FakeLLMProvider(LLMProvider):
         should_fail: bool = False,
         bad_json: bool = False,
     ) -> None:
-        self._fixed_response = fixed_response or _default_fake_response()
+        self._fixed_response = fixed_response
         self._should_fail = should_fail
         self._bad_json = bad_json
 
@@ -154,11 +154,41 @@ class FakeLLMProvider(LLMProvider):
             raise LLMProviderError("FakeLLMProvider: simulated provider failure.")
         if self._bad_json:
             return LLMResponse(text="this is not valid json {{{{", model="fake")
+
+        if self._fixed_response is not None:
+            data = self._fixed_response
+        else:
+            full_prompt = " ".join(m.content for m in request.messages)
+            if "actions" in full_prompt.lower() or "actionable" in full_prompt.lower():
+                data = _default_fake_actions_response()
+            else:
+                data = _default_fake_response()
+
         return LLMResponse(
-            text=json.dumps(self._fixed_response),
+            text=json.dumps(data),
             model="fake-model-v1",
             usage={"input": 10, "output": 20},
         )
+
+
+def _default_fake_actions_response() -> dict[str, Any]:
+    """The default structured action extraction response returned by FakeLLMProvider."""
+    return {
+        "actions": [
+            {
+                "action": "Send the structural drawing",
+                "evidence": "Architect will send the structural drawing by Friday.",
+                "confidence": 0.95,
+                "action_type": "deliverable",
+            },
+            {
+                "action": "Verify the cabinet dimensions",
+                "evidence": "Contractor should verify the cabinet dimensions.",
+                "confidence": 0.88,
+                "action_type": "task",
+            },
+        ]
+    }
 
 
 def _default_fake_response() -> dict[str, Any]:
