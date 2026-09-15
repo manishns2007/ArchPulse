@@ -223,23 +223,11 @@ The `storage_path` field in each record points to the original file in `raw/`.
 ## Running Tests
 
 ```bash
-pytest tests/ -v --tb=short
+py -m pytest tests/ -v --tb=short
+# Expected: 132 passed (83 Module 1 + 49 Module 2)
 ```
 
-Test coverage includes:
-
-- Text and transcript ingestion
-- TXT and PDF file upload
-- PDF page metadata extraction
-- Unsupported file type rejection
-- Empty and malformed input rejection
-- project_id validation (format, blank, missing)
-- Retrieve by communication ID (found and 404)
-- Project communication listing (isolation, ordering)
-- Raw file persistence verification
-- Processed JSON persistence verification
-- Path traversal protection
-- Health endpoint
+All Module 2 tests use `FakeLLMProvider` — **no real API calls required**.
 
 ---
 
@@ -248,25 +236,36 @@ Test coverage includes:
 ```
 archscale/
 ├── app/
-│   ├── main.py                  # FastAPI application entry point
-│   ├── config.py                # Settings via environment variables
+│   ├── main.py                          # FastAPI app entry point
+│   ├── config.py                        # Settings (storage + LLM) via env vars
 │   ├── models/
-│   │   └── communication.py     # CommunicationRecord + enums + request/response schemas
+│   │   ├── communication.py             # CommunicationRecord + enums (Module 1)
+│   │   └── understanding.py             # UnderstandingResult + schemas (Module 2)
 │   ├── api/
-│   │   └── ingestion.py         # HTTP route handlers (thin layer)
+│   │   ├── ingestion.py                 # Ingestion HTTP handlers (Module 1)
+│   │   └── understanding.py             # Understanding HTTP handler (Module 2)
 │   ├── services/
-│   │   └── ingestion_service.py # Core ingestion business logic
+│   │   ├── ingestion_service.py         # Core ingestion logic (Module 1)
+│   │   └── understanding_service.py     # Core understanding logic (Module 2)
+│   ├── llm/
+│   │   ├── base.py                      # LLMProvider abstract class
+│   │   └── provider.py                  # Gemini, FakeLLMProvider, factory
+│   ├── prompts/
+│   │   └── understanding.py             # System + user prompt templates
 │   └── utils/
-│       ├── pdf_extractor.py     # PDF text extraction (pypdf)
-│       └── validators.py        # Reusable input validation helpers
+│       ├── pdf_extractor.py             # PDF text extraction (pypdf)
+│       └── validators.py                # Reusable input validation helpers
 ├── storage/
-│   ├── raw/                     # Original uploaded files
-│   └── processed/               # Normalized JSON records
+│   ├── raw/                             # Original uploaded files
+│   └── processed/                       # Normalized CommunicationRecord JSON
 ├── tests/
-│   ├── conftest.py              # Shared fixtures (isolated storage, PDF builder)
-│   ├── test_ingestion_api.py    # HTTP endpoint tests
-│   ├── test_ingestion_service.py# Service layer unit tests
-│   └── test_validators.py       # Validator unit tests
+│   ├── conftest.py                      # Shared fixtures (storage, PDF builder)
+│   ├── test_ingestion_api.py            # Module 1 HTTP tests
+│   ├── test_ingestion_service.py        # Module 1 service tests
+│   ├── test_validators.py               # Validator unit tests
+│   ├── test_llm_provider.py             # Module 2 LLM provider tests
+│   ├── test_understanding_service.py    # Module 2 service tests
+│   └── test_understanding_api.py        # Module 2 HTTP tests
 ├── requirements.txt
 ├── .env.example
 └── README.md
@@ -274,11 +273,73 @@ archscale/
 
 ---
 
-## Next Steps (Module 2+)
+## Module 2 — Communication Understanding
 
-Module 1 produces `CommunicationRecord` objects. Future modules will:
+### Purpose
 
-- **Module 2**: AI extraction — tasks, deadlines, decisions, responsibilities
-- **Module 3**: Project memory & semantic search (RAG)
-- **Module 4**: Autonomous communication agent & notifications
-- **Module 5**: Dashboard & reporting
+Answer: *"What is this communication about, who is involved, what type is it, and what context should later modules know?"*
+
+> ⚠️ No task, deadline, responsibility, or decision extraction is performed in Module 2. Those belong to Module 3+.
+
+### Architecture
+
+```
+CommunicationRecord (Module 1)
+    ↓
+CommunicationUnderstandingService
+    ↓
+LLMProvider  (Gemini / OpenAI / Fake — injected)
+    ↓
+UnderstandingResult  →  Module 3+
+```
+
+### Configuration
+
+| Variable | Default | Description |
+|---|---|---|
+| `LLM_PROVIDER` | `gemini` | `gemini` or `fake` |
+| `LLM_MODEL` | `gemini-2.0-flash` | Model name |
+| `LLM_API_KEY` | _(empty)_ | API key — **never commit** |
+| `LLM_TIMEOUT_SECONDS` | `30` | Timeout in seconds |
+| `LLM_MAX_RETRIES` | `2` | Retry count |
+
+Set `LLM_PROVIDER=fake` to run without any API key.
+
+### Endpoint
+
+```
+POST /api/v1/understanding/analyze
+```
+
+**Request:**
+```json
+{ "communication_id": "<uuid from Module 1>" }
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "project_id": "villa-001",
+    "communication_id": "abc-123",
+    "concise_summary": "The client approved the revised kitchen layout...",
+    "detailed_summary": "...",
+    "topics": ["kitchen layout", "structural drawing"],
+    "stakeholders": ["client", "architect"],
+    "communication_type": "mixed",
+    "important_context": ["The revised kitchen layout has been approved."],
+    "analyzed_at": "2026-09-15T14:30:00Z",
+    "llm_model": "gemini"
+  }
+}
+```
+
+---
+
+## Next Steps (Module 3+)
+
+- **Module 3**: Task/deadline/responsibility/decision extraction from `UnderstandingResult`
+- **Module 4**: Project memory & semantic search (RAG)
+- **Module 5**: Autonomous communication agent & notifications
+- **Module 6**: Dashboard & reporting
