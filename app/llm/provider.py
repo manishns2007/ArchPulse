@@ -160,6 +160,12 @@ class FakeLLMProvider(LLMProvider):
         else:
             full_prompt = " ".join(m.content for m in request.messages)
             if (
+                "decisions and approvals" in full_prompt.lower()
+                or "what was decided" in full_prompt.lower()
+                or "what was approved" in full_prompt.lower()
+            ):
+                data = _default_fake_decision_response(full_prompt)
+            elif (
                 "deadline types" in full_prompt.lower()
                 or "actions to assign deadline for" in full_prompt.lower()
             ):
@@ -179,6 +185,41 @@ class FakeLLMProvider(LLMProvider):
             model="fake-model-v1",
             usage={"input": 10, "output": 20},
         )
+
+
+def _default_fake_decision_response(prompt: str = "") -> dict[str, Any]:
+    """The default structured decision/approval response returned by FakeLLMProvider."""
+    prompt_lower = prompt.lower()
+    if (
+        "did not approve" in prompt_lower
+        or "haven't decided" in prompt_lower
+        or "has not approved" in prompt_lower
+        or "has the client approved" in prompt_lower
+        or "if the client agrees" in prompt_lower
+        or "should we use granite or marble" in prompt_lower
+    ):
+        return {"decisions": []}
+
+    return {
+        "decisions": [
+            {
+                "item_type": "approval",
+                "description": "Revised kitchen layout was approved by the client",
+                "subject": "kitchen layout",
+                "status": "approved",
+                "evidence": "Client approved the revised kitchen layout.",
+                "confidence": 0.98,
+            },
+            {
+                "item_type": "decision",
+                "description": "Use granite for the kitchen counter",
+                "subject": "kitchen counter",
+                "status": "decided",
+                "evidence": "We decided to use granite for the kitchen counter.",
+                "confidence": 0.95,
+            },
+        ]
+    }
 
 
 def _default_fake_deadline_response(prompt: str = "") -> dict[str, Any]:

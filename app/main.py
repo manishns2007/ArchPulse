@@ -15,6 +15,7 @@ from fastapi.responses import JSONResponse
 
 from app.api.action_extraction import router as action_extraction_router
 from app.api.deadline import router as deadline_router
+from app.api.decision import router as decision_router
 from app.api.ingestion import router as ingestion_router
 from app.api.responsibility import router as responsibility_router
 from app.api.understanding import router as understanding_router
@@ -67,7 +68,9 @@ def create_app() -> FastAPI:
             "for extracted actions, linking them to persons, roles, teams, or organizations.\n\n"
             "**Module 5 — Deadline Detection**: Determines when extracted actions are due, "
             "linking them to exact dates, relative days/times, or event-based deadlines.\n\n"
-            "> No decision/approval extraction is performed in Module 5."
+            "**Module 6 — Decision & Approval Extraction**: Identifies confirmed decisions "
+            "and explicit approvals made in project communications.\n\n"
+            "> No memory, RAG, or agent orchestration is performed in Module 6."
         ),
         version="2.0.0",
         contact={
@@ -93,13 +96,21 @@ def create_app() -> FastAPI:
     app.include_router(action_extraction_router)
     app.include_router(responsibility_router)
     app.include_router(deadline_router)
+    app.include_router(decision_router)
 
     # Health check
     @app.get("/health", tags=["Health"], summary="Health check")
     async def health() -> JSONResponse:
         return JSONResponse({
             "status": "ok",
-            "modules": ["ingestion", "understanding", "action_extraction", "responsibility", "deadline"],
+            "modules": [
+                "ingestion",
+                "understanding",
+                "action_extraction",
+                "responsibility",
+                "deadline",
+                "decision",
+            ],
             "version": "2.0.0",
         })
 
