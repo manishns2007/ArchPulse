@@ -84,7 +84,6 @@ class CommunicationRecord(BaseModel):
     )
 
     model_config = {
-        "json_encoders": {datetime: lambda v: v.isoformat()},
         "use_enum_values": True,
     }
 
