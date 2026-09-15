@@ -14,6 +14,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.api.action_extraction import router as action_extraction_router
+from app.api.agent import router as agent_router
 from app.api.deadline import router as deadline_router
 from app.api.decision import router as decision_router
 from app.api.ingestion import router as ingestion_router
@@ -75,7 +76,9 @@ def create_app() -> FastAPI:
             "**Module 7 — Conversation → Structured Task**: Converts already-extracted "
             "intelligence from Modules 3–6 into structured, traceable task items.\n\n"
             "**Module 8 — Project Memory / Searchable Memory**: Indexes upstream communication "
-            "intelligence (M1–M7) into persistent, searchable, traceable project memory."
+            "intelligence (M1–M7) into persistent, searchable, traceable project memory.\n\n"
+            "**Module 9 — Agentic Project Query & User Interaction**: Natural language project "
+            "query layer with deterministic routing and evidence-grounded synthesis."
         ),
         version="2.0.0",
         contact={
@@ -104,6 +107,7 @@ def create_app() -> FastAPI:
     app.include_router(decision_router)
     app.include_router(task_router)
     app.include_router(memory_router)
+    app.include_router(agent_router)
 
     # Health check
     @app.get("/health", tags=["Health"], summary="Health check")
@@ -119,6 +123,7 @@ def create_app() -> FastAPI:
                 "decision",
                 "structured_tasks",
                 "project_memory",
+                "agent_query",
             ],
             "version": "2.0.0",
         })
