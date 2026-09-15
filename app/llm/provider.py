@@ -180,7 +180,14 @@ def _default_fake_responsibility_response(prompt: str = "") -> dict[str, Any]:
     """The default structured responsibility response returned by FakeLLMProvider."""
     import re
 
-    action_ids = re.findall(r'"action_id":\s*"([^"]+)"', prompt)
+    if "=== ACTIONS TO ASSIGN RESPONSIBILITY FOR" in prompt:
+        actions_section = prompt.split("=== ACTIONS TO ASSIGN RESPONSIBILITY FOR", 1)[1]
+        action_ids = re.findall(r'"action_id":\s*"([^"]+)"', actions_section)
+    else:
+        action_ids = [
+            aid for aid in re.findall(r'"action_id":\s*"([^"]+)"', prompt)
+            if not aid.startswith("<")
+        ]
     if action_ids:
         assignments = []
         for idx, aid in enumerate(action_ids):
