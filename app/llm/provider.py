@@ -189,14 +189,24 @@ class FakeLLMProvider(LLMProvider):
 
 def _default_fake_decision_response(prompt: str = "") -> dict[str, Any]:
     """The default structured decision/approval response returned by FakeLLMProvider."""
-    prompt_lower = prompt.lower()
+    raw_text = ""
+    if '"""' in prompt:
+        parts = prompt.split('"""')
+        if len(parts) >= 2:
+            raw_text = parts[1].lower()
+    else:
+        raw_text = prompt.lower()
+
     if (
-        "did not approve" in prompt_lower
-        or "haven't decided" in prompt_lower
-        or "has not approved" in prompt_lower
-        or "has the client approved" in prompt_lower
-        or "if the client agrees" in prompt_lower
-        or "should we use granite or marble" in prompt_lower
+        "did not approve" in raw_text
+        or "haven't decided" in raw_text
+        or "has not approved" in raw_text
+        or "has the client approved" in raw_text
+        or "if the client agrees" in raw_text
+        or "should we use granite or marble" in raw_text
+        or "architect will send the structural drawing" in raw_text
+        or "i think we should" in raw_text
+        or "we may change" in raw_text
     ):
         return {"decisions": []}
 
