@@ -69,11 +69,13 @@ def _make_action(
     action_id: str | UUID,
     action: str = "Send structural drawing",
     evidence: str = "Architect will send the structural drawing by Friday.",
+    confidence: float = 0.9,
 ) -> ExtractedAction:
     return ExtractedAction(
-        action_id=action_id,
+        action_id=str(action_id),
         action=action,
         evidence=evidence,
+        confidence=confidence,
     )
 
 
@@ -82,13 +84,15 @@ def _make_responsibility(
     responsible_party: str | None = "Architect",
     responsibility_type: str | None = "role",
     evidence: str = "Architect will send the structural drawing by Friday.",
+    confidence: float = 0.9,
 ) -> ResponsibilityAssignment:
     return ResponsibilityAssignment(
-        responsibility_id=uuid4(),
+        responsibility_id=str(uuid4()),
         action_id=str(action_id),
         responsible_party=responsible_party,
         responsibility_type=responsibility_type,  # type: ignore[arg-type]
         evidence=evidence,
+        confidence=confidence,
     )
 
 
@@ -98,14 +102,16 @@ def _make_deadline(
     deadline_type: str = "relative_day",
     normalized_deadline: str | None = "2026-09-18",
     evidence: str = "by Friday",
+    confidence: float = 0.9,
 ) -> DeadlineAssignment:
     return DeadlineAssignment(
-        deadline_id=uuid4(),
+        deadline_id=str(uuid4()),
         action_id=str(action_id),
         deadline=deadline,
         deadline_type=deadline_type,  # type: ignore[arg-type]
         normalized_deadline=normalized_deadline,
         evidence=evidence,
+        confidence=confidence,
     )
 
 
@@ -114,13 +120,15 @@ def _make_decision(
     item_type: str = "approval",
     status: str = "approved",
     evidence: str = "Client approved the revised kitchen layout.",
+    confidence: float = 0.95,
 ) -> ExtractedDecision:
     return ExtractedDecision(
-        decision_id=uuid4(),
+        decision_id=str(uuid4()),
         description=description,
         item_type=item_type,  # type: ignore[arg-type]
         status=status,  # type: ignore[arg-type]
         evidence=evidence,
+        confidence=confidence,
     )
 
 
@@ -147,8 +155,9 @@ class TestTaskService:
         assert result.communication_id == "test-comm-001"
 
     def test_empty_raw_content_raises_task_error(self, service: TaskService) -> None:
-        record = _make_record(raw_content="   ")
-        with pytest.raises(TaskError, match="empty or contains only whitespace"):
+        record = _make_record()
+        object.__setattr__(record, "raw_content", "   ")
+        with pytest.raises(TaskError, match="empty or whitespace-only"):
             service.create_structured_tasks(record=record, actions=[])
 
     def test_basic_single_action_to_single_task(self, service: TaskService) -> None:
@@ -331,6 +340,7 @@ class TestTaskService:
 
     def test_supports_extraction_result_containers(self, service: TaskService) -> None:
         record = _make_record()
+        now = datetime.now(timezone.utc)
         action = _make_action("act-001", "Action 1")
         resp = _make_responsibility("act-001", "Architect")
         dl = _make_deadline("act-001", "Friday")
@@ -340,29 +350,29 @@ class TestTaskService:
             project_id=record.project_id,
             communication_id=record.communication_id,
             actions=[action],
-            action_count=1,
-            confidence=0.9,
+            extracted_at=now,
+            llm_model="fake-llm",
         )
         resp_result = ResponsibilityExtractionResult(
             project_id=record.project_id,
             communication_id=record.communication_id,
             assignments=[resp],
-            assignment_count=1,
-            confidence=0.9,
+            extracted_at=now,
+            llm_model="fake-llm",
         )
         dl_result = DeadlineExtractionResult(
             project_id=record.project_id,
             communication_id=record.communication_id,
             assignments=[dl],
-            assignment_count=1,
-            confidence=0.9,
+            extracted_at=now,
+            llm_model="fake-llm",
         )
         dec_result = DecisionExtractionResult(
             project_id=record.project_id,
             communication_id=record.communication_id,
             decisions=[dec],
-            decision_count=1,
-            confidence=0.9,
+            extracted_at=now,
+            llm_model="fake-llm",
         )
 
         result = service.create_structured_tasks(
