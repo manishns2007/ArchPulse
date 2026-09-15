@@ -334,5 +334,6 @@ class TestTaskAPI:
             "deadline",
             "decision",
             "structured_tasks",
+            "project_memory",
         ]
         assert body["modules"] == expected_modules
