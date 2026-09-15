@@ -104,7 +104,7 @@ class TestTaskAPI:
             json={
                 "project_id": "proj-villa",
                 "source_type": "text",
-                "raw_content": (
+                "content": (
                     "Client approved the revised kitchen layout. "
                     "Architect will send the structural drawing by Friday. "
                     "Britto Sir will review the drawing after it is received."
@@ -154,7 +154,7 @@ class TestTaskAPI:
             json={
                 "project_id": "proj-villa",
                 "source_type": "text",
-                "raw_content": "Architect will send the structural drawing by Friday.",
+                "content": "Architect will send the structural drawing by Friday.",
             },
         )
         comm_id = ingest_resp.json()["data"]["communication_id"]
@@ -165,28 +165,32 @@ class TestTaskAPI:
             action_id=action_id,
             action="Send structural drawing",
             evidence="Architect will send the structural drawing by Friday.",
+            confidence=0.9,
         )
         resp_item = ResponsibilityAssignment(
-            responsibility_id=uuid4(),
+            responsibility_id=str(uuid4()),
             action_id=action_id,
             responsible_party="Architect",
             responsibility_type="role",
             evidence="Architect will send",
+            confidence=0.9,
         )
         dl_item = DeadlineAssignment(
-            deadline_id=uuid4(),
+            deadline_id=str(uuid4()),
             action_id=action_id,
             deadline="Friday",
             deadline_type="relative_day",
             normalized_deadline="2026-09-18",
             evidence="by Friday",
+            confidence=0.9,
         )
         dec_item = ExtractedDecision(
-            decision_id=uuid4(),
+            decision_id=str(uuid4()),
             description="Client approved structural layout",
             item_type="approval",
             status="approved",
             evidence="approved",
+            confidence=0.9,
         )
 
         resp = task_client.post(
@@ -234,7 +238,7 @@ class TestTaskAPI:
             json={
                 "project_id": "proj-villa",
                 "source_type": "text",
-                "raw_content": "Just an informational message with no actions.",
+                "content": "General status update: weather on site is clear today.",
             },
         )
         comm_id = ingest_resp.json()["data"]["communication_id"]
@@ -257,18 +261,19 @@ class TestTaskAPI:
             json={
                 "project_id": "proj-villa",
                 "source_type": "text",
-                "raw_content": "Architect will send drawing.",
+                "content": "Architect will send drawing.",
             },
         )
         comm_id = ingest_resp.json()["data"]["communication_id"]
 
-        action = ExtractedAction(action_id="act-1", action="Send drawing", evidence="Send drawing")
+        action = ExtractedAction(action_id="act-1", action="Send drawing", evidence="Send drawing", confidence=0.9)
         bad_resp = ResponsibilityAssignment(
-            responsibility_id=uuid4(),
+            responsibility_id=str(uuid4()),
             action_id="UNKNOWN_ACTION",
             responsible_party="Architect",
             responsibility_type="role",
             evidence="Architect",
+            confidence=0.9,
         )
 
         resp = task_client.post(
@@ -289,7 +294,7 @@ class TestTaskAPI:
             json={
                 "project_id": "proj-villa",
                 "source_type": "text",
-                "raw_content": "Architect will send drawing.",
+                "content": "Architect will send drawing.",
             },
         )
         comm_id = ingest_resp.json()["data"]["communication_id"]
@@ -319,7 +324,7 @@ class TestTaskAPI:
         resp = task_client.get("/health")
         assert resp.status_code == 200
         body = resp.json()
-        assert body["status"] == "healthy"
+        assert body["status"] == "ok"
         assert "structured_tasks" in body["modules"]
         expected_modules = [
             "ingestion",

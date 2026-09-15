@@ -1,0 +1,13 @@
+{
+  "project_id": "villa-live-proj",
+  "communication_id": "c8d0fa3e-ec0f-4328-b3bf-bae2b980ad52",
+  "source_type": "text",
+  "timestamp": "2026-09-15T20:42:11.053513Z",
+  "raw_content": "Client approved the revised kitchen layout. Architect will send the structural drawing by Friday. Britto Sir will review the drawing after it is received.",
+  "metadata": {
+    "source_type": "text",
+    "char_count": 154
+  },
+  "storage_path": null,
+  "status": "ingested"
+}

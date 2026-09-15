@@ -17,6 +17,7 @@ from app.api.action_extraction import router as action_extraction_router
 from app.api.deadline import router as deadline_router
 from app.api.decision import router as decision_router
 from app.api.ingestion import router as ingestion_router
+from app.api.memory import router as memory_router
 from app.api.responsibility import router as responsibility_router
 from app.api.tasks import router as task_router
 from app.api.understanding import router as understanding_router
@@ -73,7 +74,8 @@ def create_app() -> FastAPI:
             "and explicit approvals made in project communications.\n\n"
             "**Module 7 — Conversation → Structured Task**: Converts already-extracted "
             "intelligence from Modules 3–6 into structured, traceable task items.\n\n"
-            "> No memory, RAG, or agent orchestration is performed in Module 7."
+            "**Module 8 — Project Memory / Searchable Memory**: Indexes upstream communication "
+            "intelligence (M1–M7) into persistent, searchable, traceable project memory."
         ),
         version="2.0.0",
         contact={
@@ -101,6 +103,7 @@ def create_app() -> FastAPI:
     app.include_router(deadline_router)
     app.include_router(decision_router)
     app.include_router(task_router)
+    app.include_router(memory_router)
 
     # Health check
     @app.get("/health", tags=["Health"], summary="Health check")
@@ -115,6 +118,7 @@ def create_app() -> FastAPI:
                 "deadline",
                 "decision",
                 "structured_tasks",
+                "project_memory",
             ],
             "version": "2.0.0",
         })

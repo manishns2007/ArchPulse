@@ -563,14 +563,100 @@ POST /api/v1/decisions/extract
 
 ---
 
+---
+
+## Module 7: Conversation → Structured Task
+
+Converts already-extracted communication intelligence from Modules 3–6 into a single, structured, traceable task representation (`StructuredTaskResult`).
+
+- **Composition & Normalization, Not Re-Extraction**:
+  - **Module 3** is authoritative for **actions (what needs to be done)** (exactly 1 task per M3 action).
+  - **Module 4** is authoritative for **responsibility (who is responsible)** (matched strictly by `action_id`).
+  - **Module 5** is authoritative for **deadlines (when it is due)** (matched strictly by `action_id`).
+  - **Module 6** provides **decision context** (decisions/approvals related to the communication).
+  - **Strict Negative Boundaries**: Extra fields are strictly rejected (`ConfigDict(extra="forbid")`). Does not hallucinate new tasks, owners, deadlines, or decisions.
+- **Server Ownership**: `task_id` is generated server-side via UUID4, with server-stamped UTC `created_at`.
+- **Status & Priority Defaults**: Default status is `"pending"` and default priority is `"unspecified"`. Explicit overrides (e.g. `"completed"`, `"blocked"`, `"urgent"`, `"high"`) are only applied when verified by communication evidence.
+
+### Endpoint
+
+```http
+POST /api/v1/tasks/structure
+```
+
+**Request:**
+```json
+{
+  "communication_id": "c8d0fa3e-ec0f-4328-b3bf-bae2b980ad52",
+  "include_understanding_context": true
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "project_id": "villa-live-proj",
+    "communication_id": "c8d0fa3e-ec0f-4328-b3bf-bae2b980ad52",
+    "tasks": [
+      {
+        "task_id": "5b9440a6-8aa4-4a6d-ae2e-dadb996418a9",
+        "project_id": "villa-live-proj",
+        "communication_id": "c8d0fa3e-ec0f-4328-b3bf-bae2b980ad52",
+        "action_id": "5d79ef9a-be1d-45a9-9a88-5e51bf70e513",
+        "title": "send the structural drawing",
+        "description": "send the structural drawing for the Kitchen layout.",
+        "responsible_party": "Architect",
+        "responsibility_type": "role",
+        "deadline": "by Friday",
+        "deadline_type": "relative_day",
+        "normalized_deadline": "2026-09-18",
+        "status": "pending",
+        "priority": "unspecified",
+        "evidence": "Architect will send the structural drawing by Friday.",
+        "decision_context": [
+          "Client approved the revised kitchen layout."
+        ],
+        "created_at": "2026-09-15T20:42:30.862343Z"
+      },
+      {
+        "task_id": "cfab964f-ab56-4a22-98d6-d3be1ea36d4d",
+        "project_id": "villa-live-proj",
+        "communication_id": "c8d0fa3e-ec0f-4328-b3bf-bae2b980ad52",
+        "action_id": "3965da24-5e45-477d-8e40-3f555cade371",
+        "title": "review the drawing",
+        "description": "review the drawing for the Kitchen layout.",
+        "responsible_party": "Britto Sir",
+        "responsibility_type": "person",
+        "deadline": "after it is received",
+        "deadline_type": "event_based",
+        "normalized_deadline": null,
+        "status": "pending",
+        "priority": "unspecified",
+        "evidence": "Britto Sir will review the drawing after it is received.",
+        "decision_context": [
+          "Client approved the revised kitchen layout."
+        ],
+        "created_at": "2026-09-15T20:42:30.863162Z"
+      }
+    ],
+    "created_at": "2026-09-15T20:42:30.865265Z",
+    "task_count": 2
+  }
+}
+```
+
+---
+
 ## Testing
 
 ```powershell
-# Run all tests across Modules 1, 2, 3, 4, 5, and 6
+# Run all tests across Modules 1 to 7
 py -m pytest tests/ -v --tb=short
 ```
 
-Current test status: **265 tests passing** (83 Module 1 + 49 Module 2 + 32 Module 3 + 32 Module 4 + 35 Module 5 + 34 Module 6).
+Current test status: **298 tests passing** (83 Module 1 + 49 Module 2 + 32 Module 3 + 32 Module 4 + 35 Module 5 + 34 Module 6 + 33 Module 7).
 
 ---
 
@@ -582,4 +668,4 @@ Current test status: **265 tests passing** (83 Module 1 + 49 Module 2 + 32 Modul
 - **Module 4**: Responsibility Detection ✅
 - **Module 5**: Deadline Detection ✅
 - **Module 6**: Decision / Approval Extraction ✅
-- **Module 7**: Conversation → Structured Task
+- **Module 7**: Conversation → Structured Task ✅
