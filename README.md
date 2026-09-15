@@ -515,14 +515,62 @@ POST /api/v1/deadlines/extract
 
 ---
 
+## Module 6: Decision & Approval Extraction
+
+Identifies **confirmed decisions and explicit approvals** made in project communications.
+
+- **Strict Boundary**: Handles strictly confirmed decisions and approvals (`item_type: "decision" | "approval"`, `status: "decided" | "approved" | "rejected"`), optional subject, verbatim evidence, and confidence. Rejects all owner, deadline, task, priority, and status fields (`extra="forbid"`).
+- **Confirmed Items Only**: Does NOT extract pending items, negated decisions/approvals, questions/inquiries, suggestions, or conditional/hypothetical possibilities.
+- **Server-Side ID Generation**: `decision_id` is generated server-side via UUID4.
+
+### Endpoint
+
+```http
+POST /api/v1/decisions/extract
+```
+
+**Request:**
+```json
+{
+  "communication_id": "7e5381ee-59f4-427f-88ac-3dcf6982d218",
+  "include_understanding_context": true
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "project_id": "villa-001",
+    "communication_id": "7e5381ee-59f4-427f-88ac-3dcf6982d218",
+    "decisions": [
+      {
+        "decision_id": "3f2c5d10-8b44-4a21-9988-542190ebd410",
+        "item_type": "approval",
+        "description": "Revised kitchen layout was approved by the client",
+        "subject": "kitchen layout",
+        "status": "approved",
+        "evidence": "Client approved the revised kitchen layout.",
+        "confidence": 0.98
+      }
+    ],
+    "extracted_at": "2026-09-15T17:25:00Z",
+    "llm_model": "gemini"
+  }
+}
+```
+
+---
+
 ## Testing
 
 ```powershell
-# Run all tests across Modules 1, 2, 3, 4, and 5
+# Run all tests across Modules 1, 2, 3, 4, 5, and 6
 py -m pytest tests/ -v --tb=short
 ```
 
-Current test status: **231 tests passing** (83 Module 1 + 49 Module 2 + 32 Module 3 + 32 Module 4 + 35 Module 5).
+Current test status: **265 tests passing** (83 Module 1 + 49 Module 2 + 32 Module 3 + 32 Module 4 + 35 Module 5 + 34 Module 6).
 
 ---
 
@@ -533,5 +581,5 @@ Current test status: **231 tests passing** (83 Module 1 + 49 Module 2 + 32 Modul
 - **Module 3**: Action Extraction ✅
 - **Module 4**: Responsibility Detection ✅
 - **Module 5**: Deadline Detection ✅
-- **Module 6**: Decision / Approval Extraction
+- **Module 6**: Decision / Approval Extraction ✅
 - **Module 7**: Conversation → Structured Task
