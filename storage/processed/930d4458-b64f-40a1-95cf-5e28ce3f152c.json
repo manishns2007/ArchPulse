@@ -1,0 +1,13 @@
+{
+  "project_id": "kani-villas",
+  "communication_id": "930d4458-b64f-40a1-95cf-5e28ce3f152c",
+  "source_type": "text",
+  "timestamp": "2026-09-15T20:06:24.795637Z",
+  "raw_content": "britto sir will finalize the staircase design by friday",
+  "metadata": {
+    "source_type": "text",
+    "char_count": 55
+  },
+  "storage_path": null,
+  "status": "ingested"
+}
