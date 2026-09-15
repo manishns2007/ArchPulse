@@ -346,9 +346,95 @@ POST /api/v1/understanding/analyze
 
 ---
 
-## Next Steps (Module 3+)
+## Module 3 — Action Extraction
 
-- **Module 3**: Task/deadline/responsibility/decision extraction from `UnderstandingResult`
-- **Module 4**: Project memory & semantic search (RAG)
-- **Module 5**: Autonomous communication agent & notifications
-- **Module 6**: Dashboard & reporting
+### Purpose
+
+Answer: *"What actions/tasks are being requested, committed to, assigned, or clearly expected to happen?"*
+
+Converts unstructured action statements from project communications into structured action objects.
+
+> ⚠️ **Important Module Boundary:**
+> Module 3 is ONLY responsible for identifying actions.
+> It does **NOT** extract:
+> - `owner` / `responsible_person` (Module 4)
+> - `deadline` / `due_date` (Module 4)
+> - `decision` / `approval` (later modules)
+> - Reminders, notifications, memory, or execution.
+
+### Key Principles
+
+1. **Source of Truth**: The raw communication from Module 1 is the authoritative evidence. Module 2 understanding provides contextual grounding.
+2. **Controlled Errors**: If Module 2 understanding is unavailable or fails, a controlled error (HTTP 502) is returned instead of silently falling back.
+3. **Server-Side Action IDs**: UUID4 identifiers are generated server-side for each action to ensure consistency and prevent hallucinations.
+4. **Action vs Fact vs Discussion**:
+   - **Action**: *"Architect will send the structural drawing by Friday."* → Action: *"Send the structural drawing"*
+   - **Fact**: *"The structural drawing was sent yesterday."* → `actions: []`
+   - **Discussion**: *"The team discussed the revised kitchen layout."* → `actions: []`
+
+### Endpoint
+
+```
+POST /api/v1/actions/extract
+```
+
+**Request:**
+```json
+{
+  "communication_id": "7e5381ee-59f4-427f-88ac-3dcf6982d218"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "project_id": "villa-001",
+    "communication_id": "7e5381ee-59f4-427f-88ac-3dcf6982d218",
+    "actions": [
+      {
+        "action_id": "4e183707-ca90-4c7b-b380-60298a09fca9",
+        "action": "Send the structural drawing",
+        "evidence": "Architect will send the structural drawing by Friday.",
+        "confidence": 0.95,
+        "action_type": "deliverable"
+      }
+    ],
+    "extracted_at": "2026-09-15T17:10:00Z",
+    "llm_model": "gemini"
+  }
+}
+```
+
+### Action Types
+
+- `task`: Routine or direct work item
+- `request`: Explicit request from a participant
+- `follow_up`: Checking back or monitoring progress
+- `review`: Evaluating, checking, or reviewing drawings/specs
+- `deliverable`: Artifact, drawing, document, or physical deliverable
+- `coordination`: Syncing or cross-discipline coordination
+- `other`: Fallback when classification is uncertain
+
+---
+
+## Testing
+
+```powershell
+# Run all tests across Modules 1, 2, and 3
+py -m pytest tests/ -v --tb=short
+```
+
+Current test status: **164 tests passing** (83 Module 1 + 49 Module 2 + 32 Module 3).
+
+---
+
+## Roadmap
+
+- **Module 1**: Communication Ingestion ✅
+- **Module 2**: Communication Understanding ✅
+- **Module 3**: Action Extraction ✅
+- **Module 4**: Responsibility & Deadline Resolution
+- **Module 5**: Decision & Memory Layer
+- **Module 6**: Autonomous Agent & Notification Dispatcher
