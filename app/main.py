@@ -15,6 +15,7 @@ from fastapi.responses import JSONResponse
 
 from app.api.action_extraction import router as action_extraction_router
 from app.api.ingestion import router as ingestion_router
+from app.api.responsibility import router as responsibility_router
 from app.api.understanding import router as understanding_router
 from app.config import settings
 
@@ -61,7 +62,9 @@ def create_app() -> FastAPI:
             "identifying topics, stakeholders, communication type, and important context.\n\n"
             "**Module 3 — Action Extraction**: Identifies actionable work (tasks, requests, "
             "deliverables, reviews, follow-ups, coordination) from project communications.\n\n"
-            "> No responsibility/deadline/decision extraction is performed in Module 3."
+            "**Module 4 — Responsibility Detection**: Detects ownership / responsibility "
+            "for extracted actions, linking them to persons, roles, teams, or organizations.\n\n"
+            "> No deadline/decision extraction is performed in Module 4."
         ),
         version="2.0.0",
         contact={
@@ -85,13 +88,14 @@ def create_app() -> FastAPI:
     app.include_router(ingestion_router)
     app.include_router(understanding_router)
     app.include_router(action_extraction_router)
+    app.include_router(responsibility_router)
 
     # Health check
     @app.get("/health", tags=["Health"], summary="Health check")
     async def health() -> JSONResponse:
         return JSONResponse({
             "status": "ok",
-            "modules": ["ingestion", "understanding", "action_extraction"],
+            "modules": ["ingestion", "understanding", "action_extraction", "responsibility"],
             "version": "2.0.0",
         })
 
