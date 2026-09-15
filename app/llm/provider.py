@@ -160,6 +160,11 @@ class FakeLLMProvider(LLMProvider):
         else:
             full_prompt = " ".join(m.content for m in request.messages)
             if (
+                "deadline types" in full_prompt.lower()
+                or "actions to assign deadline for" in full_prompt.lower()
+            ):
+                data = _default_fake_deadline_response(full_prompt)
+            elif (
                 "responsibility types" in full_prompt.lower()
                 or "actions to assign responsibility for" in full_prompt.lower()
             ):
@@ -174,6 +179,65 @@ class FakeLLMProvider(LLMProvider):
             model="fake-model-v1",
             usage={"input": 10, "output": 20},
         )
+
+
+def _default_fake_deadline_response(prompt: str = "") -> dict[str, Any]:
+    """The default structured deadline response returned by FakeLLMProvider."""
+    import re
+
+    if "=== ACTIONS TO ASSIGN DEADLINE FOR" in prompt:
+        actions_section = prompt.split("=== ACTIONS TO ASSIGN DEADLINE FOR", 1)[1]
+        action_ids = re.findall(r'"action_id":\s*"([^"]+)"', actions_section)
+    else:
+        action_ids = [
+            aid for aid in re.findall(r'"action_id":\s*"([^"]+)"', prompt)
+            if not aid.startswith("<")
+        ]
+
+    if action_ids:
+        assignments = []
+        for idx, aid in enumerate(action_ids):
+            if idx == 0:
+                assignments.append({
+                    "action_id": aid,
+                    "deadline": "Friday",
+                    "deadline_type": "relative_day",
+                    "normalized_deadline": None,
+                    "evidence": "Architect will send the structural drawing by Friday.",
+                    "confidence": 0.95,
+                })
+            elif idx == 1:
+                assignments.append({
+                    "action_id": aid,
+                    "deadline": None,
+                    "deadline_type": "no_deadline",
+                    "normalized_deadline": None,
+                    "evidence": None,
+                    "confidence": 1.0,
+                })
+            else:
+                assignments.append({
+                    "action_id": aid,
+                    "deadline": None,
+                    "deadline_type": "no_deadline",
+                    "normalized_deadline": None,
+                    "evidence": None,
+                    "confidence": 1.0,
+                })
+        return {"assignments": assignments}
+
+    return {
+        "assignments": [
+            {
+                "action_id": "default-act-1",
+                "deadline": "Friday",
+                "deadline_type": "relative_day",
+                "normalized_deadline": None,
+                "evidence": "Architect will send the structural drawing by Friday.",
+                "confidence": 0.95,
+            }
+        ]
+    }
 
 
 def _default_fake_responsibility_response(prompt: str = "") -> dict[str, Any]:
