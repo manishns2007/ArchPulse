@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Shell } from './components/layout/Shell';
 import { OverviewPage } from './pages/OverviewPage';
 import { CommunicationsPage } from './pages/CommunicationsPage';

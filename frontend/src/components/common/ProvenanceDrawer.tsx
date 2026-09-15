@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, ExternalLink, ShieldCheck, Database, FileText, Calendar, User, Tag } from 'lucide-react';
+import { X, ShieldCheck, Database } from 'lucide-react';
 import type { MemorySearchResultItem } from '../../types';
 
 interface ProvenanceDrawerProps {

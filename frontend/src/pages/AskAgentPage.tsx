@@ -5,14 +5,8 @@ import {
   Send,
   ShieldCheck,
   AlertTriangle,
-  Database,
-  ChevronDown,
-  ChevronUp,
-  Cpu,
-  Layers,
   Search,
-  ExternalLink,
-  Info,
+  Tag,
 } from 'lucide-react';
 import type { AgentResponse, MemorySearchResultItem } from '../types';
 import { queryAgent } from '../api/agent';
@@ -41,7 +35,6 @@ export const AskAgentPage: React.FC<AskAgentPageProps> = ({
   const [useLlm, setUseLlm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [history, setHistory] = useState<AgentResponse[]>([]);
-  const [expandedTraceIndex, setExpandedTraceIndex] = useState<number | null>(null);
 
   useEffect(() => {
     if (initialQuery && initialQuery.trim()) {
@@ -62,13 +55,14 @@ export const AskAgentPage: React.FC<AskAgentPageProps> = ({
       // Fallback response on network error
       setHistory(prev => [
         {
-          query: queryText,
           project_id: projectId,
+          query: queryText,
+          intent: 'fallback',
           answer: `Error executing query against M9 agent: ${err.message || 'Network error'}`,
-          confidence: 0,
-          evidence_count: 0,
-          evidence_items: [],
-          is_grounded: false,
+          grounded: false,
+          result_count: 0,
+          sources: [],
+          generated_at: new Date().toISOString(),
         },
         ...prev,
       ]);
@@ -263,7 +257,7 @@ export const AskAgentPage: React.FC<AskAgentPageProps> = ({
             display: 'flex',
             flexDirection: 'column',
             gap: '16px',
-            border: item.is_grounded ? '1px solid rgba(16, 185, 129, 0.25)' : '1px solid var(--border-subtle)',
+            border: item.grounded ? '1px solid rgba(16, 185, 129, 0.25)' : '1px solid var(--border-subtle)',
           }}
         >
           {/* Query Header */}
@@ -276,7 +270,7 @@ export const AskAgentPage: React.FC<AskAgentPageProps> = ({
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              {item.is_grounded ? (
+              {item.grounded ? (
                 <span className="badge badge-approved" style={{ fontSize: '11px', gap: '4px' }}>
                   <ShieldCheck size={13} />
                   <span>100% Grounded</span>
@@ -284,12 +278,12 @@ export const AskAgentPage: React.FC<AskAgentPageProps> = ({
               ) : (
                 <span className="badge badge-review" style={{ fontSize: '11px', gap: '4px' }}>
                   <AlertTriangle size={13} />
-                  <span>Ungrounded / No Evidence</span>
+                  <span>Ungrounded / Zero Evidence Fallback</span>
                 </span>
               )}
 
               <span style={{ fontSize: '11px', color: 'var(--text-muted)', background: 'var(--bg-surface)', padding: '2px 8px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)' }}>
-                {item.evidence_count} evidence items
+                {item.result_count} evidence items
               </span>
             </div>
           </div>
@@ -297,8 +291,8 @@ export const AskAgentPage: React.FC<AskAgentPageProps> = ({
           {/* Answer Box */}
           <div
             style={{
-              background: item.is_grounded ? 'rgba(16, 185, 129, 0.04)' : 'rgba(239, 68, 68, 0.04)',
-              border: item.is_grounded ? '1px solid rgba(16, 185, 129, 0.2)' : '1px solid rgba(239, 68, 68, 0.2)',
+              background: item.grounded ? 'rgba(16, 185, 129, 0.04)' : 'rgba(239, 68, 68, 0.04)',
+              border: item.grounded ? '1px solid rgba(16, 185, 129, 0.2)' : '1px solid rgba(239, 68, 68, 0.2)',
               borderRadius: 'var(--radius-md)',
               padding: '16px 20px',
               fontSize: '14px',
@@ -309,58 +303,14 @@ export const AskAgentPage: React.FC<AskAgentPageProps> = ({
             {item.answer}
           </div>
 
-          {/* Reasoning Trace Accordion */}
-          {item.reasoning_trace && item.reasoning_trace.length > 0 && (
-            <div>
-              <button
-                type="button"
-                onClick={() => setExpandedTraceIndex(expandedTraceIndex === idx ? null : idx)}
-                className="btn-ghost"
-                style={{
-                  fontSize: '11px',
-                  color: 'var(--text-muted)',
-                  padding: '4px 8px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                }}
-              >
-                <Cpu size={13} />
-                <span>{expandedTraceIndex === idx ? 'Hide Reasoning Trace' : 'View Reasoning Trace'}</span>
-                {expandedTraceIndex === idx ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
-              </button>
-
-              {expandedTraceIndex === idx && (
-                <div
-                  style={{
-                    marginTop: '8px',
-                    padding: '12px',
-                    background: 'var(--bg-surface)',
-                    borderRadius: 'var(--radius-sm)',
-                    border: '1px solid var(--border-subtle)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '4px',
-                  }}
-                >
-                  {item.reasoning_trace.map((step, sIdx) => (
-                    <div key={sIdx} style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--text-secondary)' }}>
-                      • {step}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
           {/* Supporting Retrieved Evidence */}
-          {item.evidence_items && item.evidence_items.length > 0 && (
+          {item.sources && item.sources.length > 0 && (
             <div>
               <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '0.5px' }}>
-                Supporting Evidence Records ({item.evidence_items.length})
+                Supporting Evidence Records ({item.sources.length})
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {item.evidence_items.map((ev, evIdx) => (
+                {item.sources.map((ev, evIdx) => (
                   <div
                     key={ev.source_id || evIdx}
                     style={{
@@ -391,7 +341,21 @@ export const AskAgentPage: React.FC<AskAgentPageProps> = ({
                     </div>
 
                     <button
-                      onClick={() => onInspectProvenance(ev)}
+                      onClick={() =>
+                        onInspectProvenance({
+                          memory_id: ev.memory_id,
+                          project_id: item.project_id,
+                          item_type: (ev.item_type as any) || 'task',
+                          source_id: ev.source_id,
+                          communication_id: ev.communication_id,
+                          title: ev.title,
+                          content: ev.evidence || ev.title,
+                          evidence: ev.evidence,
+                          metadata: {},
+                          score: ev.score,
+                          retrieval_mode: 'm8_retrieved',
+                        })
+                      }
                       className="btn-ghost"
                       style={{ fontSize: '11px', padding: '3px 8px', gap: '4px', flexShrink: 0 }}
                     >
