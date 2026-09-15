@@ -87,7 +87,7 @@ class TestActionExtractionEndpoint:
             "/api/v1/ingest/text",
             json={
                 "project_id": "proj-villa",
-                "text": "Architect will send the structural drawing by Friday.",
+                "content": "Architect will send the structural drawing by Friday.",
                 "source_type": "text",
             },
         )
@@ -157,10 +157,11 @@ class TestActionExtractionEndpoint:
             "/api/v1/ingest/text",
             json={
                 "project_id": "proj-villa",
-                "text": "Contractor will verify the site measurements.",
+                "content": "Contractor will verify the site measurements.",
                 "source_type": "text",
             },
         )
+        assert ingest_resp.status_code == 201
         comm_id = ingest_resp.json()["data"]["communication_id"]
 
         # Make Module 2 understanding fail
@@ -180,10 +181,11 @@ class TestActionExtractionEndpoint:
             "/api/v1/ingest/text",
             json={
                 "project_id": "proj-villa",
-                "text": "Contractor will verify the site measurements.",
+                "content": "Contractor will verify the site measurements.",
                 "source_type": "text",
             },
         )
+        assert ingest_resp.status_code == 201
         comm_id = ingest_resp.json()["data"]["communication_id"]
 
         # Make action service fail
@@ -205,10 +207,11 @@ class TestActionExtractionEndpoint:
             "/api/v1/ingest/text",
             json={
                 "project_id": "proj-villa",
-                "text": "Contractor will verify the site measurements.",
+                "content": "Contractor will verify the site measurements.",
                 "source_type": "text",
             },
         )
+        assert ingest_resp.status_code == 201
         comm_id = ingest_resp.json()["data"]["communication_id"]
 
         bad_json_llm = FakeLLMProvider(bad_json=True)

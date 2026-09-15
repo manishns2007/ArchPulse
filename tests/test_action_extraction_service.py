@@ -304,7 +304,16 @@ class TestActionTypes:
 class TestActionExtractionServiceErrors:
     def test_empty_raw_content_raises_error(self) -> None:
         svc = _make_service()
-        record = _make_record(raw_content="   ")
+        record = CommunicationRecord.model_construct(
+            project_id="proj-1",
+            communication_id="comm-1",
+            source_type=SourceType.text,
+            timestamp=datetime.now(timezone.utc),
+            raw_content="   ",
+            metadata={},
+            storage_path=None,
+            status=IngestionStatus.ingested,
+        )
         with pytest.raises(ActionExtractionError, match="empty or whitespace"):
             svc.extract_actions(record)
 
