@@ -64,6 +64,7 @@ class TestMemoryIndexing:
             topics=["kitchen layout", "architectural drawings"],
             stakeholders=["Client", "Architect"],
             communication_type="approval",
+            important_context=["Design review completed."],
         )
         item = memory_service.index_communication(record, understanding)
 
