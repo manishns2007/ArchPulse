@@ -2,13 +2,9 @@ import React, { useEffect, useState } from 'react';
 import {
   Scale,
   Search,
-  Filter,
   ShieldCheck,
   RefreshCw,
   Sparkles,
-  CheckCircle2,
-  AlertCircle,
-  HelpCircle,
 } from 'lucide-react';
 import type { DecisionItem } from '../api/decisions';
 import { getProjectDecisions } from '../api/decisions';

@@ -4,7 +4,6 @@ import {
   Sparkles,
   Search,
   Filter,
-  FileText,
   Clock,
   ArrowRight,
   ShieldCheck,
@@ -204,7 +203,7 @@ export const CommunicationsPage: React.FC<CommunicationsPageProps> = ({
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'var(--text-muted)' }}>
                   <Clock size={12} />
                   <span>
-                    {comm.ingested_at ? new Date(comm.ingested_at).toLocaleString() : 'Recent'}
+                    {comm.timestamp ? new Date(comm.timestamp).toLocaleString() : 'Recent'}
                   </span>
                 </div>
               </div>
@@ -240,7 +239,7 @@ export const CommunicationsPage: React.FC<CommunicationsPageProps> = ({
                       retrieval_mode: 'deterministic',
                       metadata: {
                         source_type: comm.source_type,
-                        ingested_at: comm.ingested_at,
+                        timestamp: comm.timestamp,
                       },
                     })
                   }
