@@ -18,6 +18,7 @@ from app.api.deadline import router as deadline_router
 from app.api.decision import router as decision_router
 from app.api.ingestion import router as ingestion_router
 from app.api.responsibility import router as responsibility_router
+from app.api.tasks import router as task_router
 from app.api.understanding import router as understanding_router
 from app.config import settings
 
@@ -70,7 +71,9 @@ def create_app() -> FastAPI:
             "linking them to exact dates, relative days/times, or event-based deadlines.\n\n"
             "**Module 6 — Decision & Approval Extraction**: Identifies confirmed decisions "
             "and explicit approvals made in project communications.\n\n"
-            "> No memory, RAG, or agent orchestration is performed in Module 6."
+            "**Module 7 — Conversation → Structured Task**: Converts already-extracted "
+            "intelligence from Modules 3–6 into structured, traceable task items.\n\n"
+            "> No memory, RAG, or agent orchestration is performed in Module 7."
         ),
         version="2.0.0",
         contact={
@@ -97,6 +100,7 @@ def create_app() -> FastAPI:
     app.include_router(responsibility_router)
     app.include_router(deadline_router)
     app.include_router(decision_router)
+    app.include_router(task_router)
 
     # Health check
     @app.get("/health", tags=["Health"], summary="Health check")
@@ -110,6 +114,7 @@ def create_app() -> FastAPI:
                 "responsibility",
                 "deadline",
                 "decision",
+                "structured_tasks",
             ],
             "version": "2.0.0",
         })
