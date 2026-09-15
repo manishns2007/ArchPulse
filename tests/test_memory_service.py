@@ -247,9 +247,9 @@ class TestProjectIsolation:
             project_id="project-A",
             communication_id="comm-A",
             action_id="act-A",
-            title="Secret confidential plan for Project A",
-            description="Detailed specifications for Project A.",
-            evidence="Confidential plan.",
+            title="Secret underground bunker construction",
+            description="Classified blueprint for Project A.",
+            evidence="Underground bunker construction.",
         )
         memory_service.index_task(task_a)
 
@@ -258,26 +258,38 @@ class TestProjectIsolation:
             project_id="project-B",
             communication_id="comm-B",
             action_id="act-B",
-            title="Public plan for Project B",
-            description="Specifications for Project B.",
-            evidence="Public plan.",
+            title="Public garden landscaping blueprint",
+            description="Specifications for Project B garden.",
+            evidence="Landscaping blueprint.",
         )
         memory_service.index_task(task_b)
 
-        # Search in Project B for terms present in Project A
+        # Search in Project B for terms present only in Project A
         search_b = memory_service.search(
-            MemorySearchRequest(project_id="project-B", query="Secret confidential plan")
+            MemorySearchRequest(project_id="project-B", query="Secret underground bunker")
         )
         assert search_b.result_count == 0
         assert len(search_b.results) == 0
 
         # Search in Project A for Project A terms
         search_a = memory_service.search(
-            MemorySearchRequest(project_id="project-A", query="Secret confidential plan")
+            MemorySearchRequest(project_id="project-A", query="Secret underground bunker")
         )
         assert search_a.result_count == 1
         assert search_a.results[0].project_id == "project-A"
-        assert search_a.results[0].title == "Secret confidential plan for Project A"
+        assert search_a.results[0].title == "Secret underground bunker construction"
+
+        # Search in Project A for terms present only in Project B
+        search_a_b_terms = memory_service.search(
+            MemorySearchRequest(project_id="project-A", query="landscaping garden")
+        )
+        assert search_a_b_terms.result_count == 0
+
+        # Verify all items returned for Project B are strictly Project B
+        search_b_all = memory_service.search(
+            MemorySearchRequest(project_id="project-B", query="")
+        )
+        assert all(r.project_id == "project-B" for r in search_b_all.results)
 
 
 # ---------------------------------------------------------------------------
