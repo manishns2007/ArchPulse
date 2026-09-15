@@ -209,8 +209,8 @@ def create_provider(
         LLMProviderError: If required configuration (e.g. API key) is missing.
     """
     name = (provider_name or settings.llm_provider).lower().strip()
-    resolved_api_key = api_key or settings.llm_api_key
-    resolved_model = model or settings.llm_model
+    resolved_api_key = api_key if api_key is not None else settings.llm_api_key
+    resolved_model = model if model is not None else settings.llm_model
     resolved_timeout = timeout if timeout is not None else settings.llm_timeout_seconds
     resolved_retries = max_retries if max_retries is not None else settings.llm_max_retries
 
