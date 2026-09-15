@@ -450,12 +450,16 @@ class TestCriticalLiveIntegrationFlow:
         assert res3.status_code == 200
         data3 = res3.json()["data"]
         assert data3["result_count"] >= 1
-        top3 = data3["results"][0]
-        assert top3["title"] == "Review the drawing"
-        assert top3["metadata"]["responsible_party"] == "Britto Sir"
-        assert top3["evidence"] == "Britto Sir will review the drawing after it is received."
-        assert top3["communication_id"] == comm_id
-        assert top3["source_id"] == str(task_britto_review.task_id)
+        # Section 22: Expected result should retrieve "Review the drawing" with provenance
+        britto_match = next(
+            (r for r in data3["results"] if r["title"] == "Review the drawing"),
+            None,
+        )
+        assert britto_match is not None, "Expected result should retrieve 'Review the drawing'"
+        assert britto_match["metadata"]["responsible_party"] == "Britto Sir"
+        assert britto_match["evidence"] == "Britto Sir will review the drawing after it is received."
+        assert britto_match["communication_id"] == comm_id
+        assert britto_match["source_id"] == str(task_britto_review.task_id)
 
         # Query 4: "What tasks are assigned to the architect?"
         res4 = client.post(

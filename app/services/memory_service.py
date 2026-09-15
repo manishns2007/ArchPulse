@@ -524,11 +524,13 @@ class MemoryService:
             title_lower = row["title"].lower()
             content_lower = row["content"].lower()
             evidence_lower = (row["evidence"] or "").lower()
+            owner_str = str(meta.get("responsible_party") or "").lower()
+            subject_str = str(meta.get("subject") or "").lower()
             meta_str = " ".join(str(v) for v in meta.values()).lower()
 
             score = 0.0
 
-            # Exact phrase matching (+10 for title with density bonus, +8 for content/evidence)
+            # Exact phrase matching (+10 for title with density bonus, +8 for content/evidence/owner)
             if len(raw_query) > 2:
                 if raw_query in title_lower:
                     density = len(raw_query) / max(len(title_lower), 1)
@@ -537,12 +539,22 @@ class MemoryService:
                     score += 8.0
                 if raw_query in evidence_lower:
                     score += 8.0
+                if owner_str and raw_query in owner_str:
+                    score += 8.0
+                if subject_str and raw_query in subject_str:
+                    score += 6.0
 
-            # Query token matching (+6 in title, +4 in content, +3 in evidence, +2 in metadata)
+            # Query token matching (+6 in title, +5 in owner, +4 in content/subject, +3 in evidence, +2 in metadata)
             for token in tokens_to_match:
                 token_matched = False
                 if token in title_lower:
                     score += 6.0
+                    token_matched = True
+                if owner_str and token in owner_str:
+                    score += 5.0
+                    token_matched = True
+                if subject_str and token in subject_str:
+                    score += 4.0
                     token_matched = True
                 if token in content_lower:
                     score += 4.0
