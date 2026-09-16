@@ -19,9 +19,15 @@ from app.api.deadline import router as deadline_router
 from app.api.decision import router as decision_router
 from app.api.ingestion import router as ingestion_router
 from app.api.memory import router as memory_router
-from app.api.responsibility import router as responsibility_router
+from app.api.responsibility import (
+    alias_router as responsibility_alias_router,
+    router as responsibility_router,
+)
 from app.api.tasks import router as task_router
-from app.api.understanding import router as understanding_router
+from app.api.understanding import (
+    alias_router as understanding_alias_router,
+    router as understanding_router,
+)
 from app.config import settings
 
 # ---------------------------------------------------------------------------
@@ -101,8 +107,10 @@ def create_app() -> FastAPI:
     # Register routers
     app.include_router(ingestion_router)
     app.include_router(understanding_router)
+    app.include_router(understanding_alias_router)
     app.include_router(action_extraction_router)
     app.include_router(responsibility_router)
+    app.include_router(responsibility_alias_router)
     app.include_router(deadline_router)
     app.include_router(decision_router)
     app.include_router(task_router)

@@ -214,3 +214,14 @@ async def extract_responsibilities(
         ) from exc
 
     return ResponsibilityExtractionResponse(data=result)
+
+
+# Alias router for /api/v1/responsibility (singular variant)
+alias_router = APIRouter(prefix="/api/v1/responsibility", tags=["Responsibilities"])
+alias_router.add_api_route(
+    "/extract",
+    extract_responsibilities,
+    methods=["POST"],
+    response_model=ResponsibilityExtractionResponse,
+    include_in_schema=False,
+)

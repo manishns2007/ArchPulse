@@ -1,0 +1,13 @@
+{
+  "project_id": "test-proj",
+  "communication_id": "e83b78f8-364e-44c4-b0dc-91214f014e0c",
+  "source_type": "text",
+  "timestamp": "2026-09-16T04:43:38.058669Z",
+  "raw_content": "Site meeting: Alex will complete electrical conduits by Friday Sept 19. Owner approved marble flooring.",
+  "metadata": {
+    "source_type": "text",
+    "char_count": 103
+  },
+  "storage_path": null,
+  "status": "ingested"
+}
