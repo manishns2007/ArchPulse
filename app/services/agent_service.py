@@ -162,6 +162,13 @@ class AgentService:
         # 2. Memory Retrieval via M8
         results = self._retrieve_from_m8(project_id, query_text, intent, filters)
 
+        # Filter out low-relevance noise if top item has a strong match
+        if results and results[0].score and results[0].score >= 10.0:
+            min_threshold = max(results[0].score * 0.45, 8.0)
+            strong_results = [r for r in results if (r.score or 0.0) >= min_threshold]
+            if strong_results:
+                results = strong_results
+
         # 3. Zero-Hallucination check: No supporting evidence found
         if not results:
             return AgentResponse(
