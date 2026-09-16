@@ -105,7 +105,29 @@ class AgentService:
             return "deadline", filters
 
         # Responsibility intent
-        if any(p in q_lower for p in ("assigned to", "who is", "who owns", "responsible for", "waiting for")):
+        if any(
+            p in q_lower
+            for p in (
+                "assigned to",
+                "assigned for",
+                "assigned",
+                "assignee",
+                "assignment",
+                "responsible for",
+                "responsibility",
+                "who is",
+                "who has",
+                "who was",
+                "who will",
+                "who owns",
+                "who handles",
+                "who is handling",
+                "who leads",
+                "in charge",
+                "took charge",
+                "waiting for",
+            )
+        ):
             return "responsibility", filters
 
         # Task intent
