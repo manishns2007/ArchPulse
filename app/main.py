@@ -6,6 +6,7 @@ FastAPI application entry point (Module 1 + Module 2).
 from __future__ import annotations
 
 import logging
+import os
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
@@ -96,10 +97,19 @@ def create_app() -> FastAPI:
         lifespan=lifespan,
     )
 
-    # CORS (permissive for development — tighten in production)
+    # CORS: Configurable via CORS_ORIGINS (comma-separated), fallback to ["*"] for development
+    cors_origins_raw = os.getenv("CORS_ORIGINS", "*").strip()
+    if cors_origins_raw == "*" or not cors_origins_raw:
+        cors_origins = ["*"]
+        allow_creds = False
+    else:
+        cors_origins = [orig.strip() for orig in cors_origins_raw.split(",") if orig.strip()]
+        allow_creds = True
+
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],
+        allow_origins=cors_origins,
+        allow_credentials=allow_creds,
         allow_methods=["*"],
         allow_headers=["*"],
     )
@@ -140,3 +150,10 @@ def create_app() -> FastAPI:
 
 
 app = create_app()
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    port = int(os.getenv("PORT", "8000"))
+    uvicorn.run("app.main:app", host="0.0.0.0", port=port, reload=False)
