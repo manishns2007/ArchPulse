@@ -76,15 +76,21 @@ class ActionExtractionService:
 
     def __init__(self, llm_provider: LLMProvider) -> None:
         self._llm = llm_provider
+        self._cache: dict[str, ActionExtractionResult] = {}
 
     # ------------------------------------------------------------------
     # Public interface
     # ------------------------------------------------------------------
 
+    def clear_cache(self) -> None:
+        """Clear cached action extraction results."""
+        self._cache.clear()
+
     def extract_actions(
         self,
         record: CommunicationRecord,
         understanding: UnderstandingResult | None = None,
+        use_cache: bool = True,
     ) -> ActionExtractionResult:
         """
         Extract actions from a CommunicationRecord.
@@ -92,6 +98,7 @@ class ActionExtractionService:
         Args:
             record: A fully ingested CommunicationRecord from Module 1.
             understanding: Optional Module 2 understanding result for context.
+            use_cache: If True, reuse previously extracted actions for this record.
 
         Returns:
             ActionExtractionResult with validated ExtractedAction list.
@@ -101,6 +108,9 @@ class ActionExtractionService:
             ActionExtractionProviderError:   LLM API failure.
             ActionExtractionValidationError: Unparseable or invalid LLM response.
         """
+        if use_cache and record.communication_id in self._cache:
+            return self._cache[record.communication_id]
+
         self._validate_record(record)
 
         request = self._build_request(record, understanding)
@@ -114,6 +124,7 @@ class ActionExtractionService:
             record.project_id,
             self._llm.provider_name,
         )
+        self._cache[record.communication_id] = result
         return result
 
     # ------------------------------------------------------------------

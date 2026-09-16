@@ -107,11 +107,13 @@ export async function runSequentialPipeline(
 
   // Step 4: Responsibility (M4)
   onStageUpdate('responsibility', 'running');
+  let responsibilities: any[] = [];
   try {
     const respRes = await request<any>('/api/v1/responsibilities/extract', {
       method: 'POST',
-      body: JSON.stringify({ communication_id: commId }),
+      body: JSON.stringify({ communication_id: commId, actions }),
     });
+    responsibilities = respRes.data?.assignments || [];
     onStageUpdate('responsibility', 'completed', respRes.data);
   } catch (err: any) {
     onStageUpdate('responsibility', 'failed', null, err.message);
@@ -120,11 +122,13 @@ export async function runSequentialPipeline(
 
   // Step 5: Deadlines (M5)
   onStageUpdate('deadlines', 'running');
+  let deadlines: any[] = [];
   try {
     const dlRes = await request<any>('/api/v1/deadlines/extract', {
       method: 'POST',
-      body: JSON.stringify({ communication_id: commId }),
+      body: JSON.stringify({ communication_id: commId, actions, responsibilities }),
     });
+    deadlines = dlRes.data?.assignments || [];
     onStageUpdate('deadlines', 'completed', dlRes.data);
   } catch (err: any) {
     onStageUpdate('deadlines', 'failed', null, err.message);
@@ -152,7 +156,13 @@ export async function runSequentialPipeline(
   try {
     const taskRes = await request<{ success: boolean; data: { tasks: StructuredTask[] } }>('/api/v1/tasks/structure', {
       method: 'POST',
-      body: JSON.stringify({ communication_id: commId }),
+      body: JSON.stringify({
+        communication_id: commId,
+        actions,
+        responsibilities,
+        deadlines,
+        decisions,
+      }),
     });
     tasks = taskRes.data.tasks || [];
     onStageUpdate('tasks', 'completed', tasks);

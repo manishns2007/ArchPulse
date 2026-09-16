@@ -58,17 +58,23 @@ class CommunicationUnderstandingService:
 
     def __init__(self, llm_provider: LLMProvider) -> None:
         self._llm = llm_provider
+        self._cache: dict[str, UnderstandingResult] = {}
 
     # ------------------------------------------------------------------
     # Public interface
     # ------------------------------------------------------------------
 
-    def analyze(self, record: CommunicationRecord) -> UnderstandingResult:
+    def clear_cache(self) -> None:
+        """Clear cached understanding results."""
+        self._cache.clear()
+
+    def analyze(self, record: CommunicationRecord, use_cache: bool = True) -> UnderstandingResult:
         """
         Analyze a CommunicationRecord and return a structured UnderstandingResult.
 
         Args:
             record: A fully ingested CommunicationRecord from Module 1.
+            use_cache: If True, reuse previously generated understanding for this record.
 
         Returns:
             UnderstandingResult with summary, topics, stakeholders, etc.
@@ -78,6 +84,9 @@ class CommunicationUnderstandingService:
             UnderstandingProviderError:   LLM API failure (unrecoverable).
             UnderstandingValidationError: LLM returned unparse-able JSON.
         """
+        if use_cache and record.communication_id in self._cache:
+            return self._cache[record.communication_id]
+
         self._validate_record(record)
 
         request = self._build_request(record)
@@ -90,6 +99,7 @@ class CommunicationUnderstandingService:
             record.project_id,
             self._llm.provider_name,
         )
+        self._cache[record.communication_id] = result
         return result
 
     # ------------------------------------------------------------------
