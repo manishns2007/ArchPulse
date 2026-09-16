@@ -374,7 +374,9 @@ class AgentService:
                 "any facts, dates, people, or tasks not present in the evidence.\n\n"
                 f"Question: {query}\n\n"
                 f"Verified Memory Items:\n{evidence_context}\n\n"
-                "Provide a clear, factual answer with exact quote evidence where applicable."
+                "Provide a direct, concise, factual answer addressing specifically what was asked. "
+                "Include the responsible person and exact quote evidence where applicable. "
+                "Do not include unrelated meeting notes or background discussions."
             )
             try:
                 llm_response = self.llm_provider.generate(prompt)
@@ -399,17 +401,25 @@ class AgentService:
                 task_items = results[:3]
 
             party = task_items[0].metadata.get("responsible_party")
-            party_header = f"{party} has the following task(s):" if party else "Retrieved task(s):"
+            all_same_party = bool(party) and all(
+                t.metadata.get("responsible_party") == party for t in task_items
+            )
+            if party and all_same_party:
+                party_header = f"{party} is assigned to the following task(s):"
+            elif party:
+                party_header = f"Tasks assigned to {party} and others:"
+            else:
+                party_header = "Retrieved task(s):"
 
             task_bullets: list[str] = []
             evidences: list[str] = []
-            for t in task_items:
+            for t in task_items[:5]:
                 owner = t.metadata.get("responsible_party")
                 dl = t.metadata.get("normalized_deadline") or t.metadata.get("deadline")
                 status = t.metadata.get("status")
 
                 details = []
-                if owner and not party:
+                if owner and not (party and all_same_party):
                     details.append(f"Owner: {owner}")
                 if dl:
                     details.append(f"Due: {dl}")
@@ -418,12 +428,12 @@ class AgentService:
 
                 details_str = f" ({', '.join(details)})" if details else ""
                 task_bullets.append(f"• {t.title}{details_str}")
-                if t.evidence:
+                if t.evidence and f'"{t.evidence}"' not in evidences:
                     evidences.append(f'"{t.evidence}"')
 
             answer_parts = [party_header, "\n".join(task_bullets)]
             if evidences:
-                answer_parts.append(f"Evidence:\n" + "\n".join(evidences[:2]))
+                answer_parts.append("Evidence:\n" + "\n".join(evidences[:2]))
             answer_parts.append(f"Source:\ncommunication {task_items[0].communication_id}")
             return "\n\n".join(answer_parts)
 
@@ -444,11 +454,28 @@ class AgentService:
 
         # 4. General Memory / Communication fallback
         top = results[0]
-        answer_parts = [
-            f"Found relevant project memory:",
-            f"• {top.title}",
-            f"{top.content}",
+        answer_parts = ["Found relevant project memory:"]
+        if top.title:
+            answer_parts.append(f"• {top.title}")
+        # Only include raw content if it's short and distinct from the title
+        if not top.title and top.content:
+            answer_parts.append(top.content)
+        elif top.content and top.content != top.title and len(top.content) <= 300:
+            answer_parts.append(top.content)
+
+        # Include matching structured items if present
+        structured_items = [
+            r for r in results if r.item_type in ("task", "decision", "approval") and r != top
         ]
+        if structured_items:
+            extra_bullets = []
+            for item in structured_items[:3]:
+                owner = item.metadata.get("responsible_party")
+                owner_str = f" (Owner: {owner})" if owner else ""
+                extra_bullets.append(f"• {item.title}{owner_str}")
+            if extra_bullets:
+                answer_parts.append("\n".join(extra_bullets))
+
         if top.evidence:
             answer_parts.append(f'Evidence:\n"{top.evidence}"')
         answer_parts.append(f"Source:\ncommunication {top.communication_id}")
