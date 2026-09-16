@@ -43,7 +43,7 @@ class Settings(BaseSettings):
     llm_provider: str = "gemini"
 
     # Model identifier (interpreted by the selected provider)
-    llm_model: str = "gemini-2.5-flash"
+    llm_model: str = "gemini-3.6-flash"
 
     # API key — read from env, never hard-coded
     llm_api_key: str = ""

@@ -1,0 +1,13 @@
+{
+  "project_id": "proj-demo",
+  "communication_id": "5b4a6f24-5c8f-4c6b-8ee2-a262fe1625fd",
+  "source_type": "text",
+  "timestamp": "2026-09-16T04:56:46.033879Z",
+  "raw_content": "Liam confirmed structural slab inspection for block C is set for Monday 10am. Rachel approved Italian travertine finishes.",
+  "metadata": {
+    "source_type": "text",
+    "char_count": 122
+  },
+  "storage_path": null,
+  "status": "ingested"
+}

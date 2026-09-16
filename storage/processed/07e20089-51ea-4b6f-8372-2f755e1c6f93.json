@@ -1,0 +1,13 @@
+{
+  "project_id": "villa-live-proj",
+  "communication_id": "07e20089-51ea-4b6f-8372-2f755e1c6f93",
+  "source_type": "text",
+  "timestamp": "2026-09-16T04:53:21.539229Z",
+  "raw_content": "Liam: Quick update from the field. Foundation slab pour for Sector 4 is locked in for Thursday 7:00 AM.\nCarlos: Roger that. Carlos will ensure cement mixer trucks have site access clearance by Wednesday 5 PM.\nLiam: Also, structural engineer approved adding superplasticizer batch #441 to maintain slump.",
+  "metadata": {
+    "source_type": "text",
+    "char_count": 303
+  },
+  "storage_path": null,
+  "status": "ingested"
+}
