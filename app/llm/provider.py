@@ -122,6 +122,106 @@ class GeminiProvider(LLMProvider):
 
 
 # ---------------------------------------------------------------------------
+# Groq provider
+# ---------------------------------------------------------------------------
+
+
+class GroqProvider(LLMProvider):
+    """
+    Groq LLM provider via official `groq` Python SDK.
+
+    Requires `GROQ_API_KEY` (or `LLM_API_KEY`) to be set.
+    Uses structured JSON mode (`response_format={"type": "json_object"}`).
+    """
+
+    def __init__(self, api_key: str, model: str, timeout: int, max_retries: int) -> None:
+        self._api_key = api_key
+        self._model = model
+        self._timeout = timeout
+        self._max_retries = max_retries
+        self._client: Any = None
+
+    def _get_client(self) -> Any:
+        if self._client is None:
+            try:
+                from groq import Groq
+                self._client = Groq(api_key=self._api_key, timeout=float(self._timeout))
+            except ImportError as exc:
+                raise LLMProviderError(
+                    "groq is not installed. Run: pip install groq"
+                ) from exc
+            except Exception as exc:
+                raise LLMProviderError(f"Failed to initialize Groq client: {exc}") from exc
+        return self._client
+
+    @property
+    def provider_name(self) -> str:
+        return "groq"
+
+    def generate(self, request: LLMRequest) -> LLMResponse:
+        """Send prompt to Groq and return response text."""
+        client = self._get_client()
+
+        messages = [
+            {"role": msg.role, "content": msg.content}
+            for msg in request.messages
+        ]
+
+        attempt = 0
+        last_exc: Exception | None = None
+
+        while attempt <= self._max_retries:
+            try:
+                response = client.chat.completions.create(
+                    messages=messages,
+                    model=self._model,
+                    temperature=request.temperature,
+                    max_tokens=request.max_tokens,
+                    response_format={"type": "json_object"},
+                )
+
+                if not response.choices:
+                    raise LLMResponseError("Groq returned a response with no choices.")
+
+                choice = response.choices[0]
+                text = choice.message.content
+                if not text or not text.strip():
+                    raise LLMResponseError("Groq returned an empty response.")
+
+                usage: dict[str, int] = {}
+                if getattr(response, "usage", None):
+                    usage = {
+                        "input": getattr(response.usage, "prompt_tokens", 0),
+                        "output": getattr(response.usage, "completion_tokens", 0),
+                    }
+
+                return LLMResponse(
+                    text=text.strip(),
+                    model=self._model,
+                    usage=usage,
+                    raw=response,
+                )
+            except LLMResponseError:
+                raise
+            except Exception as exc:
+                last_exc = exc
+                attempt += 1
+                logger.warning(
+                    "Groq request failed (attempt %d/%d): %s",
+                    attempt,
+                    self._max_retries + 1,
+                    exc,
+                )
+                if attempt <= self._max_retries:
+                    import time
+                    time.sleep(2 ** (attempt - 1))
+
+        raise LLMProviderError(
+            f"Groq provider failed after {self._max_retries + 1} attempts: {last_exc}"
+        ) from last_exc
+
+
+# ---------------------------------------------------------------------------
 # FakeProvider — deterministic stub for tests
 # ---------------------------------------------------------------------------
 
@@ -431,10 +531,29 @@ def create_provider(
             max_retries=resolved_retries,
         )
 
+    if name == "groq":
+        groq_key = (
+            api_key
+            or getattr(settings, "groq_api_key", "")
+            or resolved_api_key
+        )
+        if not groq_key:
+            raise LLMProviderError(
+                "GROQ_API_KEY (or LLM_API_KEY) is required for the Groq provider. "
+                "Set it in your .env file or GROQ_API_KEY environment variable."
+            )
+        return GroqProvider(
+            api_key=groq_key,
+            model=resolved_model,
+            timeout=resolved_timeout,
+            max_retries=resolved_retries,
+        )
+
     if name == "fake":
         return FakeLLMProvider()
 
     raise ValueError(
         f"Unsupported LLM provider: '{name}'. "
-        "Supported values: 'gemini', 'fake'."
+        "Supported values: 'gemini', 'groq', 'fake'."
     )
+

@@ -7,6 +7,7 @@ Covers Module 1 (ingestion) and Module 2 (understanding).
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -38,7 +39,7 @@ class Settings(BaseSettings):
     # Module 2 — LLM Provider
     # ------------------------------------------------------------------
 
-    # Which provider to use: "gemini" | "openai" | "fake"
+    # Which provider to use: "gemini" | "groq" | "openai" | "fake"
     # Set to "fake" in tests so no real API calls are made.
     llm_provider: str = "gemini"
 
@@ -48,11 +49,21 @@ class Settings(BaseSettings):
     # API key — read from env, never hard-coded
     llm_api_key: str = ""
 
+    # Optional dedicated Groq API key (falls back to llm_api_key or GROQ_API_KEY env var)
+    groq_api_key: str = ""
+
     # Request timeout in seconds
     llm_timeout_seconds: int = 30
 
     # Number of retry attempts on transient failures
     llm_max_retries: int = 2
+
+    def model_post_init(self, __context: Any) -> None:
+        if not self.llm_api_key and self.groq_api_key:
+            self.llm_api_key = self.groq_api_key
+        elif not self.groq_api_key and self.llm_api_key:
+            self.groq_api_key = self.llm_api_key
+
 
     # -------------------------------------------------------------------
     # Derived helpers (not env vars)
