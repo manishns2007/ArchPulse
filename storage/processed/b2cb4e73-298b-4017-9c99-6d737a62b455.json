@@ -1,0 +1,13 @@
+{
+  "project_id": "villa-live-proj",
+  "communication_id": "b2cb4e73-298b-4017-9c99-6d737a62b455",
+  "source_type": "text",
+  "timestamp": "2026-09-15T21:33:10.686024Z",
+  "raw_content": "Site coordination meeting summary:\n1. Marco confirmed MEP ducting in zone B must be rerouted before inspection by Friday Sept 19.\n2. Rachel approved the revised Italian travertine stone tiles for the penthouse master suites.\n3. David will coordinate electrical conduits with the ceiling contractor by Tuesday.\n4. Elena confirmed the budget overrun of $12,500 for upgraded HVAC chillers is approved by ownership.\n5. Sarah must deliver finalized structural load calculations to city engineering department by September 24.",
+  "metadata": {
+    "source_type": "text",
+    "char_count": 520
+  },
+  "storage_path": null,
+  "status": "ingested"
+}
