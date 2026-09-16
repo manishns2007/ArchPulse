@@ -1,0 +1,13 @@
+{
+  "project_id": "groq-demo-proj",
+  "communication_id": "c588fe11-0d2d-4d2c-8d2e-d24ab7f277f3",
+  "source_type": "text",
+  "timestamp": "2026-09-16T07:12:50.224277Z",
+  "raw_content": "Client approved the revised kitchen layout.\nArchitect will send the structural drawing by Friday.\nBritto Sir will review the drawing after it is received.",
+  "metadata": {
+    "source_type": "text",
+    "char_count": 154
+  },
+  "storage_path": null,
+  "status": "ingested"
+}

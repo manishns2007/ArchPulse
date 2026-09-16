@@ -1,0 +1,13 @@
+{
+  "project_id": "test-check-provider",
+  "communication_id": "06d3ab73-2599-4ecb-9ca8-2601b59aad07",
+  "source_type": "text",
+  "timestamp": "2026-09-16T07:11:25.373094Z",
+  "raw_content": "Client approved kitchen layout.",
+  "metadata": {
+    "source_type": "text",
+    "char_count": 31
+  },
+  "storage_path": null,
+  "status": "ingested"
+}

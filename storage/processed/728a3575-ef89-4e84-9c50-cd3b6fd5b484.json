@@ -1,0 +1,13 @@
+{
+  "project_id": "stage-c-test",
+  "communication_id": "728a3575-ef89-4e84-9c50-cd3b6fd5b484",
+  "source_type": "text",
+  "timestamp": "2026-09-16T07:09:51.350311Z",
+  "raw_content": "Client approved the revised kitchen layout. Architect will send the structural drawing by Friday. Britto Sir will review the drawing after it is received.",
+  "metadata": {
+    "source_type": "text",
+    "char_count": 154
+  },
+  "storage_path": null,
+  "status": "ingested"
+}
