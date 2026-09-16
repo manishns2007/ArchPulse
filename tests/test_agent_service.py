@@ -236,6 +236,21 @@ class TestGroundedAnswerSynthesis:
         assert "Review the drawing" in res.answer
         assert any("Britto Sir will review the drawing" in (s.evidence or "") for s in res.sources)
 
+    def test_query_who_has_been_assigned(self, agent_service: AgentService) -> None:
+        req = AgentQueryRequest(
+            project_id=self.project_id,
+            query="who has been assigned for structural drawing?",
+        )
+        res = agent_service.query(req)
+
+        assert res.grounded is True
+        assert res.intent == "responsibility"
+        assert ("Architect is assigned" in res.answer or "Owner: Architect" in res.answer)
+        assert "Send the structural drawing" in res.answer
+        # Ensures no full raw transcript dump
+        assert "Client approved the revised kitchen layout" not in res.answer
+        assert len(res.sources) >= 1
+
     def test_query_project_overview(self, agent_service: AgentService) -> None:
         req = AgentQueryRequest(
             project_id=self.project_id,

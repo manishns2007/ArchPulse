@@ -413,10 +413,8 @@ class AgentService:
             )
             if party and all_same_party:
                 party_header = f"{party} is assigned to the following task(s):"
-            elif party:
-                party_header = f"Tasks assigned to {party} and others:"
             else:
-                party_header = "Retrieved task(s):"
+                party_header = "Assigned task(s):"
 
             task_bullets: list[str] = []
             evidences: list[str] = []
