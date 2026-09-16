@@ -79,7 +79,7 @@ export async function runSequentialPipeline(
   onStageUpdate('understand', 'running');
   let understanding: UnderstandingResult;
   try {
-    const undRes = await request<{ success: boolean; data: UnderstandingResult }>('/api/v1/understand/analyze', {
+    const undRes = await request<{ success: boolean; data: UnderstandingResult }>('/api/v1/understanding/analyze', {
       method: 'POST',
       body: JSON.stringify({ communication_id: commId }),
     });
@@ -108,7 +108,7 @@ export async function runSequentialPipeline(
   // Step 4: Responsibility (M4)
   onStageUpdate('responsibility', 'running');
   try {
-    const respRes = await request<any>('/api/v1/responsibility/extract', {
+    const respRes = await request<any>('/api/v1/responsibilities/extract', {
       method: 'POST',
       body: JSON.stringify({ communication_id: commId }),
     });

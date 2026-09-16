@@ -43,7 +43,7 @@ export async function getCommunicationById(communicationId: string): Promise<Com
 }
 
 export async function analyzeUnderstanding(communicationId: string): Promise<UnderstandingResult> {
-  const res = await request<ApiSuccessResponse<UnderstandingResult>>('/api/v1/understand/analyze', {
+  const res = await request<ApiSuccessResponse<UnderstandingResult>>('/api/v1/understanding/analyze', {
     method: 'POST',
     body: JSON.stringify({
       communication_id: communicationId,

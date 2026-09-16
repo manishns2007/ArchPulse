@@ -119,3 +119,14 @@ async def analyze_communication(request: AnalyzeRequest) -> UnderstandingRespons
         ) from exc
 
     return UnderstandingResponse(data=result)
+
+
+# Alias router for /api/v1/understand (singular variant)
+alias_router = APIRouter(prefix="/api/v1/understand", tags=["Understanding"])
+alias_router.add_api_route(
+    "/analyze",
+    analyze_communication,
+    methods=["POST"],
+    response_model=UnderstandingResponse,
+    include_in_schema=False,
+)
