@@ -3,7 +3,11 @@
  * Centralized fetch with error handling and environment configuration.
  */
 
-const BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/+$/, '');
+const BASE_URL = (
+  import.meta.env.VITE_API_BASE_URL ||
+  import.meta.env.VITE_API_URL ||
+  ''
+).replace(/\/+$/, '');
 
 export class ApiError extends Error {
   status: number;
