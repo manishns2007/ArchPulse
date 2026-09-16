@@ -1,0 +1,13 @@
+{
+  "project_id": "diagnostic-proj",
+  "communication_id": "38712c9a-9e25-4d05-a6ab-287ca598ac68",
+  "source_type": "text",
+  "timestamp": "2026-09-16T05:10:43.501215Z",
+  "raw_content": "Client approved the revised kitchen layout.\nArchitect will send the structural drawing by Friday.\nBritto Sir will review the drawing after it is received.",
+  "metadata": {
+    "source_type": "text",
+    "char_count": 154
+  },
+  "storage_path": null,
+  "status": "ingested"
+}

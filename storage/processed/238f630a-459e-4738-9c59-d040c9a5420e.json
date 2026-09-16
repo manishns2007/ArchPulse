@@ -1,0 +1,13 @@
+{
+  "project_id": "villa-live-proj",
+  "communication_id": "238f630a-459e-4738-9c59-d040c9a5420e",
+  "source_type": "text",
+  "timestamp": "2026-09-16T05:04:48.891179Z",
+  "raw_content": "Hi Team,\nFollowing up on the facade engineering review:\nWe have officially approved triple-pane acoustic glazing for the street-facing curtain walls (Spec Ref: FG-402).\nAlex - please finalize thermal barrier detailing by end of week, Sept 18th.\nMarcus is responsible for submitting acoustic test certifications to the lead architect by Sept 22.\nBest regards,\nClaire",
+  "metadata": {
+    "source_type": "text",
+    "char_count": 365
+  },
+  "storage_path": null,
+  "status": "ingested"
+}
